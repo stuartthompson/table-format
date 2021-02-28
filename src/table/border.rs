@@ -64,20 +64,6 @@ impl Border {
             self.top_right)
     }
 
-    /// Formats a horizontal split
-    pub fn format_horizontal_split(
-        self: &Border,
-        width: u8
-    ) -> String {
-        format!("{}{}{}",
-            self.left_split,
-            &(0..width - 2)
-                .map(|_| self.horizontal_split)
-                .collect::<String>(),
-            self.right_split
-        )
-    }
-
     /// Formats the bottom border
     pub fn format_bottom(
         self: &Border,
@@ -101,6 +87,20 @@ impl Border {
         self: &Border
     ) -> String {
         format!("{}", self.right)
+    }
+
+    /// Formats a horizontal split
+    pub fn format_horizontal_split(
+        self: &Border,
+        width: u8
+    ) -> String {
+        format!("{}{}{}",
+            self.left_split,
+            &(0..width - 2)
+                .map(|_| self.horizontal_split)
+                .collect::<String>(),
+            self.right_split
+        )
     }
 
     pub fn format_vertical_split(

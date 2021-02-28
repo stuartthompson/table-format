@@ -14,6 +14,12 @@ impl TableCell {
             lines: Vec::new()
         }
     }
+
+    /// Returns a TableCell from a DataItem.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `data_item` - The data item from which to build the table cell.
     pub fn from_data_item(
         data_item: DataItem
     ) -> TableCell {
@@ -39,6 +45,26 @@ impl TableCell {
         } else {
             String::from("")
         }
+    }
+
+    /// Measures the height of this cell that will result from formatting its 
+    ///  contents into a specific column width.
+    /// 
+    ///  # Arguments
+    /// 
+    /// * `self` - The table cell being measured.
+    /// * `column_width` - The column width to measure against.
+    pub fn measure_height(
+        self: &TableCell,
+        column_width: u8
+    ) -> u8 {
+        let mut height = 0;
+
+        for line in &self.lines {
+            height += line.measure_width().div_euclid(column_width) + 1;
+        }
+
+        height
     }
 }
 

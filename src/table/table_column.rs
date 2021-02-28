@@ -66,10 +66,9 @@ impl TableColumn {
             // Fixed width + 2 for border chars
             ColumnWidth::Fixed(fixed_width) => fixed_width,
             ColumnWidth::Minimum(min_width) => {
-                // Either min width or width of content
-                //  (whichever is shorter)
+                // Use min-width if content is shorter
                 let content_width = self.content_width();
-                if min_width < content_width {
+                if content_width < min_width {
                     min_width
                 } else {
                     content_width
@@ -88,5 +87,46 @@ impl TableColumn {
         self: &TableColumn
     ) -> u8 {
         self.header_content.lines.len() as u8
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_measure_width_fixed() {
+        let column = TableColumn::fixed(String::from("test"), 10);
+
+        let measured_width = column.measure_width();
+
+        assert_eq!(measured_width, 10);
+    }
+
+    #[test]
+    fn test_measure_width_min_width_shorter_content() {
+        let column = TableColumn::min_width(String::from("test"), 10);
+
+        let measured_width = column.measure_width();
+
+        assert_eq!(measured_width, 10);
+    }
+
+    #[test]
+    fn test_measure_width_min_width_longer_content() {
+        let column = TableColumn::min_width(String::from("test"), 2);
+
+        let measured_width = column.measure_width();
+
+        assert_eq!(measured_width, 4);
+    }
+
+    #[test]
+    fn test_measure_width_min_width_same_length_content() {
+        let column = TableColumn::min_width(String::from("test"), 4);
+
+        let measured_width = column.measure_width();
+
+        assert_eq!(measured_width, 4);
     }
 }

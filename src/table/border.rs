@@ -58,7 +58,7 @@ impl Border {
     ) -> String {
         format!("{}{}{}", 
             self.top_left,
-            &(0..width)
+            &(0..width - 2)
                 .map(|_| self.top)
                 .collect::<String>(),
             self.top_right)
@@ -71,7 +71,7 @@ impl Border {
     ) -> String {
         format!("{}{}{}",
             self.left_split,
-            &(0..width)
+            &(0..width - 2)
                 .map(|_| self.horizontal_split)
                 .collect::<String>(),
             self.right_split
@@ -85,9 +85,27 @@ impl Border {
     ) -> String {
         format!("{}{}{}", 
             self.bottom_left,
-            &(0..width)
+            &(0..width - 2)
                 .map(|_| self.bottom)
                 .collect::<String>(),
             self.bottom_right)
+    }
+
+    pub fn format_left(
+        self: &Border
+    ) -> String {
+        format!("{}", self.left)
+    }
+
+    pub fn format_right(
+        self: &Border
+    ) -> String {
+        format!("{}", self.right)
+    }
+
+    pub fn format_vertical_split(
+        self: &Border
+    ) -> String {
+        format!("{}", self.vertical_split)
     }
 }

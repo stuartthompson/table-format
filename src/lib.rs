@@ -24,11 +24,12 @@ mod tests {
 
         let output = table.format(80);
 
-        let expected = String::from("");
+        let expected = String::from("+-------------------------------+\n|Food           |Count          |\n+-------------------------------+\n");
 
-        println!("0--------10--------20");
-        println!("{}", output);
+        // println!("1-------10--------20--------30--------40--------50--------60--------70--------80");
+        // println!("         |         |         |         |         |         |         |         |");
+        // println!("{}", output);
 
-        //assert_eq!(expected, output);
+        assert_eq!(expected, output);
     }
 }

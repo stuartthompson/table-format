@@ -4,38 +4,35 @@ mod table_cell;
 mod table_column;
 mod table_row;
 
+use super::data_item::DataItem;
 use border::Border;
 use table_cell::TableCell;
 pub use table_column::TableColumn;
 use table_row::TableRow;
-use super::data_item::DataItem;
 
 pub struct Table {
     border: Border,
     columns: Vec<TableColumn>,
-    rows: Vec<TableRow>
+    rows: Vec<TableRow>,
 }
 
 impl Table {
-    // Returns an empty table 
+    // Returns an empty table
     pub fn new() -> Table {
         Table {
             border: Border::default(),
             columns: Vec::new(),
-            rows: Vec::new()
+            rows: Vec::new(),
         }
     }
 
     /// Builds a table from a data source
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `source` - The data source to build the table from.
     /// * `columns` - Columns describing how the data is structured.
-    pub fn from(
-        source: &mut dyn Iterator<Item = DataItem>,
-        columns: Vec<TableColumn>,
-    ) -> Table {
+    pub fn from(source: &mut dyn Iterator<Item = DataItem>, columns: Vec<TableColumn>) -> Table {
         let mut table = Table::new();
         table.columns = columns;
 
@@ -58,7 +55,7 @@ impl Table {
 
                     // Append cell
                     table.rows[row_index].cells.push(cell);
-                },
+                }
                 None => {
                     break;
                 }
@@ -67,8 +64,7 @@ impl Table {
             // Advance column index (wraps to 0 when out of columns)
             if column_index < table.columns.len() {
                 column_index = column_index + 1;
-            } 
-            else {
+            } else {
                 column_index = 0;
                 // Add a new row to the table
                 table.rows.push(TableRow::new());
@@ -80,9 +76,9 @@ impl Table {
     }
 
     /// Adds a row to a table.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `self` - The table to add the row to.
     /// * `row` - The row to add.
     pub fn add_row(self: &mut Table, row: TableRow) {
@@ -90,99 +86,138 @@ impl Table {
     }
 
     /// Returns the contents of a table formatted as a string.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `self` - The table to format.
     /// * `width` - The width in chars at which to wrap columns.
     pub fn format(self: &Table, width: u8) -> String {
         let mut result: String = String::from("");
-        
         // Print table headers
         result.push_str(&self.format_header(width));
 
         // Iterate the rows in the table
         for row in &self.rows {
             // Iterate columns
-            for col in &self.columns {
-
-            }
+            for col in &self.columns {}
         }
 
         result
     }
 
     /// Formats the column headers for a table.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `self` - The table containing the column headers to format.
-    /// * `width` - The width in chars at which to wrap columns. 
-    fn format_header(
-        self: &Table,
-        width: u8
-    ) -> String {
+    /// * `width` - The width in chars at which to wrap columns.
+    fn format_header(self: &Table, width: u8) -> String {
         let mut result: String = String::from("");
 
-        let current_width = 0;
-        let cols_rendered = 0;
+        let header_width = self.measure_header_width();
+        let header_height = self.measure_header_height();
 
-        let header_width = Table::measure_header(&self.columns);
-        
         // Print top border
-        result.push_str(&format!("{}\n", &self.border.format_top(width)));
+        result.push_str(&format!("{}\n", &self.border.format_top(header_width)));
 
-        // Iterate the columns
-        for col in &self.columns {
-            // Render the lines of the column header
-            for line in &col.header_content.lines {
-                result.push_str(&line.format(col.measure_width()));
+        // Iterate the number of lines
+        for line_ix in 0..header_height {
+            // Left border
+            result.push_str(&self.border.format_left());
+            // Write the column headers for this line
+            for col_ix in 0..self.columns.len() {
+                let col = &self.columns[col_ix];
+                result.push_str(&format!(
+                    "{}",
+                    col.header_content
+                        .format_line(line_ix as usize, col.measure_width())
+                ));
+                // Vertical split (except for final column)
+                if col_ix < self.columns.len() - 1 {
+                    result.push_str(&format!("{}", &self.border.format_vertical_split()));
+                }
             }
+            result.push_str(&format!("{}\n", &self.border.format_right()));
         }
-        result.push_str("\n");
-
-        // Print debug line lengths
-        for col in &self.columns {
-            result.push_str(&format!("Length: {}", col.measure_width()));
-        }
-        result.push_str("\n");
 
         // Print horizontal split beneath headers
-        result.push_str(&format!("{}\n", &self.border.format_bottom(width)));
+        result.push_str(&format!("{}\n", &self.border.format_bottom(header_width)));
 
         result
     }
 
-    /// Returns the width required to draw table columns
-    fn measure_header(
-        columns: &Vec<TableColumn>
-    ) -> u8 {
-        let mut consumed_width = 0;
-        
-        for col in columns {
-            consumed_width += col.measure_width()
+    /// Measures the width of the table header.
+    ///
+    /// # Arguments
+    ///
+    /// * `self` - The table being measured.
+    fn measure_header_width(self: &Table) -> u8 {
+        let mut header_width = 0;
+
+        for col in &self.columns {
+            header_width += col.measure_width()
         }
 
-        consumed_width
+        // Add space for the outer borders
+        header_width += 2;
+
+        // Add space for vertical splits separators between columns
+        header_width += (self.columns.len() - 1) as u8;
+
+        header_width
     }
 
     /// Measures the height of a table's column headers.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `self` - The table being measured.
-    fn measure_header_height(
-        self: &Table
-    ) -> u8 {
+    fn measure_header_height(self: &Table) -> u8 {
         let mut tallest_height = 0;
 
         for col in &self.columns {
             let col_height = col.measure_height();
             if col_height > tallest_height {
-                tallest_height = col_height 
+                tallest_height = col_height
             }
         }
 
         tallest_height
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn measure_header_one_column() {
+        let mut table = Table::new();
+
+        table
+            .columns
+            .push(TableColumn::fixed(String::from("test"), 15));
+
+        // Expect 15 chars for column, 2 for outer border chars
+        let expected_width = 17;
+
+        assert_eq!(table.measure_header_width(), expected_width);
+    }
+
+    #[test]
+    fn measure_header_two_columns() {
+        let mut table = Table::new();
+
+        table
+            .columns
+            .push(TableColumn::fixed(String::from("test"), 15));
+        table
+            .columns
+            .push(TableColumn::fixed(String::from("test"), 15));
+
+        // Expect 33 chars. 2 x 15 columns + 2 for outer border, 1 for split
+        let expected_width = 33;
+
+        assert_eq!(table.measure_header_width(), expected_width);
     }
 }

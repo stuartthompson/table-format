@@ -11,10 +11,8 @@ mod tests {
 
     #[test]
     fn test_1x1_table() {
-        let values: Vec<&str> = 
-            vec!("Fish", "3", "Apples", "5", "Pizza", "13");
-
-        let mut data = VecDataSource::from(values);
+        let mut data = VecDataSource::from(
+            vec!("Fish", "3", "Apples", "5", "Pizza", "13"));
 
         let columns = vec!(
             TableColumn::fixed("Food".to_string(), 15),

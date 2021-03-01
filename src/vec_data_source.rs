@@ -24,7 +24,7 @@ impl<T> Iterator for VecDataSource<T>
                 format!("{}", self.data[self.current_ix]),
                 Color::White,
                 Alignment::Center,
-                Wrap::NoWrap
+                Wrap::Wrap
             );
 
             let item = DataItem {

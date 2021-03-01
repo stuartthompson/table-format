@@ -131,10 +131,7 @@ impl Table {
             // Write the column headers for this line
             for col_ix in 0..self.columns.len() {
                 let col = &self.columns[col_ix];
-                result.push_str(
-                    &col.header_content
-                        .format_line(line_ix as usize, col.measure_width()),
-                );
+                result.push_str("HEADER");
                 // Vertical split (except for final column)
                 if col_ix < self.columns.len() - 1 {
                     result.push_str(&self.border.format_vertical_split());

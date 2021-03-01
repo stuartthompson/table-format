@@ -30,6 +30,14 @@ impl TableRow {
 
         let row_height = self.measure_height(columns);
 
+        // Get content iterators for each cell
+        let mut content_iterators = Vec::new();
+        for cell_ix in 0..self.cells.len() {
+            let cell = &self.cells[cell_ix];
+            let column = &columns[cell_ix];
+            content_iterators.push(cell.get_iterator(column.measure_width()));
+        }
+
         // Iterate the number of lines
         for line_ix in 0..row_height {
             // Left border
@@ -39,9 +47,14 @@ impl TableRow {
                 let cell = &self.cells[cell_ix];
                 let column = &columns[cell_ix];
                 result.push_str(
-                    &cell
-                        .format_line(
-                            line_ix as usize, column.measure_width())
+                    &match content_iterators[cell_ix].next() {
+                        Some(content) => format!("{}", content),
+                        None => {
+                        format!("{}", (0..column.measure_width())
+                            .map(|_| " ")
+                            .collect::<String>())
+                        }
+                    }
                 );
                 // Vertical split (except for final column)
                 if cell_ix < columns.len() - 1 {

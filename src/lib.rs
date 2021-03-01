@@ -18,7 +18,7 @@ mod tests {
     #[test]
     fn test_simple_vector_table() {
         let mut data = VecDataSource::from(
-            vec!("Fish", "3", "Apples", "5", "Pizza", "13"));
+            vec!("FishFishFishFishFishFish", "3", "Apples", "5", "Pizza", "13"));
 
         let food_header = Content::new(
             String::from("Food"),

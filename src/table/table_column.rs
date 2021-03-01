@@ -21,7 +21,7 @@ impl TableColumn {
     ) -> TableColumn {
         let mut header_cell: TableCell = TableCell::new();
         // Push content into header cell for title
-        header_cell.lines.push(header_content);
+        header_cell.content_lines.push(header_content);
         TableColumn { 
             header_content: header_cell,
             width,
@@ -80,7 +80,7 @@ impl TableColumn {
         self: &TableColumn
     ) -> usize {
         let mut longest_line = 0;
-        for line in &self.header_content.lines {
+        for line in &self.header_content.content_lines {
             let line_width = line.measure_width();
             if line_width > longest_line {
                 longest_line = line_width;
@@ -120,7 +120,7 @@ impl TableColumn {
     pub fn measure_height(
         self: &TableColumn
     ) -> usize {
-        self.header_content.lines.len()
+        self.header_content.content_lines.len()
     }
 }
 

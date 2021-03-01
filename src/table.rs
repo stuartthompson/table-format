@@ -20,6 +20,7 @@ impl Table {
     pub fn new() -> Table {
         Table {
             border: Border::default(),
+
             columns: Vec::new(),
             rows: Vec::new(),
         }
@@ -28,7 +29,8 @@ impl Table {
     /// Builds a table from a data source and formats using a set of 
     ///  supplied columns.
     /// 
-    /// The columns are used to understand where new rows should occur.
+    /// The columns define vertical breaks used determine when to wrap or 
+    ///  truncate content.
     ///
     /// # Arguments
     ///
@@ -124,6 +126,7 @@ impl Table {
         result.push_str(&self.border.format_top(header_width));
         result.push_str("\n");
 
+        
         // Iterate the number of lines
         for line_ix in 0..header_height {
             // Left border

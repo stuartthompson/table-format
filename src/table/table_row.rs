@@ -50,9 +50,10 @@ impl TableRow {
                     &match content_iterators[cell_ix].next() {
                         Some(content) => format!("{}", content),
                         None => {
-                        format!("{}", (0..column.measure_width())
-                            .map(|_| " ")
-                            .collect::<String>())
+                            // No more lines so fill height with empty space
+                            format!("{}", (0..column.measure_width())
+                                .map(|_| " ")
+                                .collect::<String>())
                         }
                     }
                 );

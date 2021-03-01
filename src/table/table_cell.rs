@@ -1,11 +1,11 @@
-use super::line::Line;
+use crate::content::Content;
 use crate::data_item::DataItem;
 
 /// A table cell represents a single grid rectangle within a table.
 /// 
 /// Cells belong to a row.
 pub struct TableCell {
-    pub lines: Vec<Line>,
+    pub lines: Vec<Content>,
 }
 
 impl TableCell {
@@ -38,7 +38,7 @@ impl TableCell {
     pub fn format_line(
         self: &TableCell,
         line_index: usize, 
-        width: u8
+        width: usize
     ) -> String {
         if line_index < self.lines.len() {
             self.lines[line_index].format(width)
@@ -59,19 +59,18 @@ impl TableCell {
     /// * `column_width` - The column width to measure against.
     pub fn measure_height(
         self: &TableCell,
-        column_width: u8
-    ) -> u8 {
+        column_width: usize
+    ) -> usize {
         let mut height = 0;
 
         for line in &self.lines {
-            let line_width = line.measure_width();
+            let line_width = line.measure_height(column_width);
             // If line fits within column then line height is 1
             if line_width <= column_width {
                 height += 1
             } else {
                 // Determine how many lines are needed when content is wrapped
-                height += line.measure_width().div_euclid(column_width) + 1;
-
+                height += line_width.div_euclid(column_width) + 1;
             }
         }
 

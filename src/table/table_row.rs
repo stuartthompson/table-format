@@ -24,7 +24,7 @@ impl TableRow {
         self: &TableRow,
         border: &Border,
         columns: &Vec<TableColumn>,
-        maximum_width: u8
+        maximum_width: usize
     ) -> String {
         let mut result: String = String::from("");
 
@@ -65,7 +65,7 @@ impl TableRow {
     fn measure_height(
         self: &TableRow,
         columns: &Vec<TableColumn>,
-    ) -> u8 {
+    ) -> usize {
         let mut tallest_height = 0;
 
         // Iterate the columns and measure cells based upon their column

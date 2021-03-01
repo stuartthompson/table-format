@@ -1,5 +1,4 @@
 mod border;
-pub mod line;
 mod table_cell;
 mod table_column;
 mod table_row;
@@ -198,7 +197,7 @@ impl Table {
     /// # Arguments
     ///
     /// * `self` - The table being measured.
-    fn measure_width(self: &Table) -> u8 {
+    fn measure_width(self: &Table) -> usize {
         let mut header_width = 0;
 
         // Sum the widths of the header columns
@@ -210,7 +209,7 @@ impl Table {
         header_width += 2;
 
         // Add space for vertical splits separators between columns
-        header_width += (self.columns.len() - 1) as u8;
+        header_width += self.columns.len() - 1;
 
         header_width
     }
@@ -220,7 +219,7 @@ impl Table {
     /// # Arguments
     ///
     /// * `self` - The table being measured.
-    fn measure_header_height(self: &Table) -> u8 {
+    fn measure_header_height(self: &Table) -> usize {
         let mut tallest_height = 0;
 
         for col in &self.columns {
@@ -237,14 +236,23 @@ impl Table {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use colored::Color;
+    use crate::content::{Content, Alignment, Wrap};
 
     #[test]
     fn measure_header_one_column() {
         let mut table = Table::new();
 
+        let header = Content::new(
+            String::from("test"),
+            Color::White,
+            Alignment::Center,
+            Wrap::NoWrap
+        );
+
         table
             .columns
-            .push(TableColumn::fixed(String::from("test"), 15));
+            .push(TableColumn::fixed(header, 15));
 
         // Expect 15 chars for column, 2 for outer border chars
         let expected_width = 17;
@@ -256,12 +264,26 @@ mod tests {
     fn measure_header_two_columns() {
         let mut table = Table::new();
 
+        let header1 = Content::new(
+            String::from("test"),
+            Color::White,
+            Alignment::Center,
+            Wrap::NoWrap
+        );
+
+        let header2 = Content::new(
+            String::from("test"),
+            Color::White,
+            Alignment::Center,
+            Wrap::NoWrap
+        );
+
         table
             .columns
-            .push(TableColumn::fixed(String::from("test"), 15));
+            .push(TableColumn::fixed(header1, 15));
         table
             .columns
-            .push(TableColumn::fixed(String::from("test"), 15));
+            .push(TableColumn::fixed(header2, 15));
 
         // Expect 33 chars. 2 x 15 columns + 2 for outer border, 1 for split
         let expected_width = 33;

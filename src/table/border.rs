@@ -54,7 +54,7 @@ impl Border {
     /// Formats the top border
     pub fn format_top(
         self: &Border,
-        width: u8
+        width: usize
     ) -> String {
         format!("{}{}{}", 
             self.top_left,
@@ -67,7 +67,7 @@ impl Border {
     /// Formats the bottom border
     pub fn format_bottom(
         self: &Border,
-        width: u8
+        width: usize
     ) -> String {
         format!("{}{}{}", 
             self.bottom_left,
@@ -92,7 +92,7 @@ impl Border {
     /// Formats a horizontal split
     pub fn format_horizontal_split(
         self: &Border,
-        width: u8
+        width: usize
     ) -> String {
         format!("{}{}{}",
             self.left_split,

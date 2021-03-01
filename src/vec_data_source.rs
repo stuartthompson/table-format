@@ -1,5 +1,6 @@
 use super::data_item::DataItem;
-use super::table::line::Line;
+use colored::Color;
+use super::content::{Content, Alignment, Wrap};
 
 pub struct VecDataSource<T> {
     current_ix: usize,
@@ -19,8 +20,15 @@ impl<T> Iterator for VecDataSource<T>
     fn next(&mut self) -> Option<DataItem> {
         if self.current_ix < self.data.len() {
 
+            let content = Content::new(
+                format!("{}", self.data[self.current_ix]),
+                Color::White,
+                Alignment::Center,
+                Wrap::NoWrap
+            );
+
             let item = DataItem {
-                lines: vec!(Line::from(format!("{}", self.data[self.current_ix])))
+                lines: vec!(content)
             };
 
             self.current_ix += 1;

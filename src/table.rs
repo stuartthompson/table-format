@@ -26,13 +26,19 @@ impl Table {
         }
     }
 
-    /// Builds a table from a data source
+    /// Builds a table from a data source and formats using a set of 
+    ///  supplied columns.
+    /// 
+    /// The columns are used to understand where new rows should occur.
     ///
     /// # Arguments
     ///
     /// * `source` - The data source to build the table from.
     /// * `columns` - Columns describing how the data is structured.
-    pub fn from(source: &mut dyn Iterator<Item = DataItem>, columns: Vec<TableColumn>) -> Table {
+    pub fn from(
+        source: &mut dyn Iterator<Item = DataItem>, 
+        columns: Vec<TableColumn>
+    ) -> Table {
         let mut table = Table::new();
         table.columns = columns;
 

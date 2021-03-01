@@ -41,7 +41,13 @@ impl TableColumn {
         TableColumn::new(header_title, ColumnWidth::Minimum(width))
     }
 
-    pub fn content_width(
+    pub fn content(
+        header_title: String
+    ) -> TableColumn {
+        TableColumn::new(header_title, ColumnWidth::Content)
+    }
+
+    pub fn measure_content_width(
         self: &TableColumn
     ) -> u8 {
         let mut longest_line = 0;
@@ -67,14 +73,14 @@ impl TableColumn {
             ColumnWidth::Fixed(fixed_width) => fixed_width,
             ColumnWidth::Minimum(min_width) => {
                 // Use min-width if content is shorter
-                let content_width = self.content_width();
+                let content_width = self.measure_content_width();
                 if content_width < min_width {
                     min_width
                 } else {
                     content_width
                 }
             },
-            ColumnWidth::Content => self.content_width()
+            ColumnWidth::Content => self.measure_content_width()
         }
     }
 

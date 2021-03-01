@@ -43,7 +43,10 @@ impl TableCell {
         if line_index < self.lines.len() {
             self.lines[line_index].format(width)
         } else {
-            String::from("")
+            // An empty line of spaces the width of the column
+            (0..width)
+                .map(|_| " ")
+                .collect::<String>()
         }
     }
 
@@ -61,7 +64,15 @@ impl TableCell {
         let mut height = 0;
 
         for line in &self.lines {
-            height += line.measure_width().div_euclid(column_width) + 1;
+            let line_width = line.measure_width();
+            // If line fits within column then line height is 1
+            if line_width <= column_width {
+                height += 1
+            } else {
+                // Determine how many lines are needed when content is wrapped
+                height += line.measure_width().div_euclid(column_width) + 1;
+
+            }
         }
 
         height

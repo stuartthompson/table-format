@@ -23,7 +23,7 @@ impl<T> Iterator for VecDataSource<T>
             let content = Content::new(
                 format!("{}", self.data[self.current_ix]),
                 Color::White,
-                Alignment::Center,
+                Alignment::Left,
                 Wrap::Wrap
             );
 

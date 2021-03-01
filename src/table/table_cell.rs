@@ -22,7 +22,7 @@ impl<'a> Iterator for TableCellContentIterator<'a> {
                         Some(content)
                     },
                     None => {
-                        // Increment the current line
+                        // Go to the next line
                         self.current_line_ix += 1;
 
                         // If there are more lines, get iterator for next line
@@ -43,7 +43,9 @@ impl<'a> Iterator for TableCellContentIterator<'a> {
             };
 
         match line {
-            Some(content) => Some(content),
+            Some(content) => {
+                Some(content)
+            } ,
             None => {
                 if self.current_height < self.target_height {
                     // An empty line of spaces the width of the column

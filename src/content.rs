@@ -24,7 +24,14 @@ impl Iterator for ContentIterator {
     type Item = String;
     fn next(&mut self) -> Option<String> {
         if self.next_part_ix < self.parts.len() {
-            Some(self.parts[self.next_part_ix].to_string())
+            // Get the next line part
+            let line_part = self.parts[self.next_part_ix].to_string();
+            
+            // Increment the line part counter
+            self.next_part_ix += 1;
+
+            // Return the line part
+            Some(line_part)
         } else {
             None
         }
@@ -96,6 +103,7 @@ impl Content {
                     let to = 
                         if line_ix < num_lines - 1 { from + width }
                         else { from + partial_line_len };
+                
                     result.push(
                         Content::pad(
                             &self.content[from..to], 
@@ -111,43 +119,6 @@ impl Content {
             next_part_ix: 0
         }
     }
-
-    /// Formats part of a content line.
-    /// 
-    /// This considers alignment and wrapping.
-    /// 
-    /// If the content does not wrap (i.e. truncates) then there is only one 
-    ///  part, the truncated line. However, if the content does wrap then 
-    ///  the requested line part is returned.
-    /// 
-    /// Wrapping breaks are determined based upon the supplied width.
-    /// 
-    /// # Arguments
-    /// 
-    /// * `self` - The content to format.
-    /// * `part_ix` - The index of the line part to format.
-    /// * `width` - The width at which to wrap or truncate.
-    // fn format_part(
-    //     self: &Content,
-    //     part_ix: usize,
-    //     width: usize
-    // ) -> String {
-    //     // Truncated lines 
-    //     if !self.will_wrap() {
-    //         Content::pad(&self.content, self.alignment, width)
-    //     }
-    //     else {
-    //         // Get the requested line part
-    //         let content_len = self.content.len();
-
-    //         let from = part_ix * width;
-    //         let to = 
-    //             if (from + width) > content_len { content_len - 1}
-    //             else { from + width }; 
-            
-    //         Content::pad(&self.content[from..to], self.alignment, width)
-    //     }
-    // }
 
     fn pad(
         line: &str,
@@ -253,39 +224,6 @@ impl Content {
         match self.wrap {
             Wrap::Wrap => true,
             Wrap::NoWrap => false
-        }
-    }
-
-    fn wrap_or_truncate(
-        self: &Content, 
-        width: usize
-    ) -> String {
-        let content_len = self.content.len();
-
-        match self.wrap {
-            // Truncate on single line
-            Wrap::NoWrap => {
-                format!("{}...",
-                    self.content[0..(width - 3 )].to_string(),
-                )
-            }
-            // Wrap to multiple lines
-            Wrap::Wrap => {
-                let num_lines = self.measure_height(width);
-                let partial_line_len = content_len.rem_euclid(width);
-                // Collect the wrapped lines
-                let mut parts: Vec<&str> = Vec::new();
-
-                for line_ix in 0..num_lines {
-                    let from = line_ix * width;
-                    let to = 
-                        if line_ix < num_lines - 1 { from + width }
-                        else { from + partial_line_len };
-                    parts.push(&self.content[from..to])
-                }
-                // Join the lines with newlines
-                parts.join("\n")
-            }
         }
     }
 }

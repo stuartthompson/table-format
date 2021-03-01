@@ -1,10 +1,11 @@
 mod content;
 mod data_item;
 mod data_source;
+mod table_data_source;
 mod vec_data_source;
 mod table;
 
-use table::{Table, TableColumn};
+use table::Table;
 use data_item::DataItem;
 // use data_source::WSDataFrame;
 use vec_data_source::VecDataSource;

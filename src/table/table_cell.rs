@@ -1,4 +1,5 @@
 use crate::content::{Content, ContentIterator};
+use super::column_break::{ColumnBreak, BreakWidth};
 use crate::data_item::DataItem;
 
 pub struct TableCellContentIterator<'a> {
@@ -67,13 +68,13 @@ impl<'a> Iterator for TableCellContentIterator<'a> {
 /// 
 /// Cells belong to a row.
 pub struct TableCell {
-    pub content_lines: Vec<Content>
+    pub contents: Vec<Content>
 }
 
 impl TableCell {
     pub fn new() -> TableCell {
         TableCell {
-            content_lines: Vec::new()
+            contents: Vec::new()
         }
     }
 
@@ -86,7 +87,7 @@ impl TableCell {
         data_item: DataItem
     ) -> TableCell {
         TableCell {
-            content_lines: data_item.lines
+            contents: data_item.lines
         }
     }
 
@@ -98,14 +99,17 @@ impl TableCell {
     /// * `width` - The format width.
     pub fn get_iterator(
         self: &TableCell,
-        width: usize
+        column_break: &ColumnBreak
     ) -> TableCellContentIterator {
+        // Determine the render width of this cell
+        let cell_width = self.measure_width(column_break);
+
         TableCellContentIterator {
-            content: &self.content_lines,
-            current_content_iterator: self.content_lines[0].get_iterator(width),
+            content: &self.contents,
+            current_content_iterator: self.contents[0].get_iterator(cell_width),
             current_line_ix: 0,
-            width: width,
-            target_height: self.measure_height(width),
+            width: cell_width,
+            target_height: self.measure_height(column_break),
             current_height: 0
         }
     }
@@ -119,21 +123,68 @@ impl TableCell {
     /// * `column_width` - The column width to measure against.
     pub fn measure_height(
         self: &TableCell,
-        column_width: usize
+        column_break: &ColumnBreak,
     ) -> usize {
         let mut height = 0;
 
-        for line in &self.content_lines {
+        // Determine the render width of this cell
+        let cell_width = self.measure_width(column_break);
+
+        for line in &self.contents {
             let line_width = line.measure_width();
             // If line fits within column then line height is 1
-            if !line.will_wrap() || (line_width <= column_width) {
+            if !line.will_wrap() || (line_width <= cell_width) {
                 height += 1
             } else {
                 // Determine how many lines are needed when content is wrapped
-                height += line_width.div_euclid(column_width) + 1;
+                height += line_width.div_euclid(cell_width) + 1;
             }
         }
 
         height
+    }
+
+    /// Measures the width of this cell.
+    ///
+    /// # Arguments
+    /// 
+    /// * `self` - The table cell being measured.
+    /// * `column_break` - The column break for this cell.
+    pub fn measure_width(
+        self: &TableCell,
+        column_break: &ColumnBreak,
+    ) -> usize {
+        match column_break.width {
+            BreakWidth::Fixed(fixed) => fixed,
+            BreakWidth::Minimum(minimum_width) => {
+                let content_width = self.measure_content_width();
+                if minimum_width > content_width {
+                    minimum_width
+                } else {
+                    content_width
+                }
+            },
+            BreakWidth::Content => {
+                self.measure_content_width()
+            }
+        }
+    }
+
+    /// Returns the width of the longest content item in this cell.
+    /// 
+    /// This measure ignores wrapping or truncation and returns the raw width 
+    ///  of the longest content item.
+    fn measure_content_width(
+        self: &TableCell
+    ) -> usize {
+        let largest = 0;
+        for content in &self.contents {
+            let content_width = content.measure_width();
+            if content_width > largest {
+                largest = content_width;
+            } 
+        }
+
+        largest  
     }
 }

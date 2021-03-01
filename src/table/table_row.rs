@@ -1,10 +1,29 @@
 use super::border::Border;
+use super::column_break::{ColumnBreak, BreakWidth};
 use super::table_cell::TableCell;
-use super::table_column::TableColumn;
+
+pub struct CellIterator<'a> {
+    cells: &'a Vec<TableCell>,
+    current_cell_ix: usize
+}
+
+impl<'a> Iterator for CellIterator<'a> {
+    type Item = &'a TableCell;
+
+    fn next(&mut self) -> Option<&'a TableCell> {
+        if self.current_cell_ix < self.cells.len() {
+            let cell: &TableCell = &self.cells[self.current_cell_ix];
+            self.current_cell_ix += 1;
+            Some(cell)
+        } else {
+            None
+        }
+    }
+}
 
 /// Table rows represent horizontal breakpoints.
 pub struct TableRow {
-    pub cells: Vec<TableCell>
+    cells: Vec<TableCell>
 }
 
 impl TableRow {
@@ -12,6 +31,25 @@ impl TableRow {
         TableRow {
             cells: Vec::new()
         }
+    }
+
+    pub fn from(
+        cells: Vec<TableCell>
+    ) -> TableRow {
+        TableRow { cells }
+    }
+
+    pub fn iter(
+        self: &TableRow,
+    ) -> CellIterator {
+        CellIterator {
+            cells: &self.cells,
+            current_cell_ix: 0
+        }
+    }
+
+    pub fn len(self: &TableRow) -> usize { 
+        self.cells.len()
     }
 
     /// Formats a table row.
@@ -23,19 +61,19 @@ impl TableRow {
     pub fn format(
         self: &TableRow,
         border: &Border,
-        columns: &Vec<TableColumn>,
+        column_breaks: &Vec<ColumnBreak>,
         maximum_width: usize
     ) -> String {
         let mut result: String = String::from("");
 
-        let row_height = self.measure_height(columns);
+        let row_height = self.measure_height(column_breaks);
 
         // Get content iterators for each cell
         let mut content_iterators = Vec::new();
         for cell_ix in 0..self.cells.len() {
             let cell = &self.cells[cell_ix];
-            let column = &columns[cell_ix];
-            content_iterators.push(cell.get_iterator(column.measure_width()));
+            let column_break = &column_breaks[cell_ix];
+            content_iterators.push(cell.get_iterator(column_break.measure_width()));
         }
 
         // Iterate the number of lines
@@ -76,27 +114,30 @@ impl TableRow {
     ///
     /// * `self` - The table row being measured.
     /// * `columns` - The columns used to format the cells for this row.
-    fn measure_height(
+    pub fn measure_height(
         self: &TableRow,
-        columns: &Vec<TableColumn>,
+        column_breaks: &Vec<ColumnBreak>,
     ) -> usize {
         let mut tallest_height = 0;
 
-        // Iterate the columns and measure cells based upon their column
-        for column_ix in 0..columns.len() {
-            let column = &columns[column_ix];
-
-            // Guard against more columns than cells
-            if column_ix < self.cells.len() {
-                let cell = &self.cells[column_ix];
-                let cell_height = cell.measure_height(column.measure_width());
-                if cell_height > tallest_height {
-                    tallest_height = cell_height;
-                }
+        // Iterate the row cells and measure based upon supplied column breaks
+        let column_break_ix = 0;
+        let content_break = ColumnBreak { width: BreakWidth::Content };
+        for cell in &self.cells {
+            // Get the next column break (if one is available)
+            let column_break: &ColumnBreak = 
+                if column_break_ix < column_breaks.len() {
+                    &column_breaks[column_break_ix]
+                } else {
+                    // Use content-width break for additional columns
+                    &content_break
+                };
+            let cell_height = cell.measure_height(column_break);
+            if cell_height > tallest_height {
+                tallest_height = cell_height;
             }
         }
 
         tallest_height
     }
-
 }

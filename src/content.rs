@@ -97,11 +97,22 @@ impl Content {
         match self.wrap {
             // Truncate on single line
             Wrap::NoWrap => {
-                result.push(
-                    format!("{}...",
-                        self.content[0..(content_len - 3)].to_string(),
-                    )
-                );
+                // Calculate any overage
+                if content_len <= width {
+                    result.push(
+                        Content::pad(
+                            &self.content,
+                            &self.alignment, 
+                            width
+                        )
+                    );
+                } else {
+                    result.push(
+                        format!("{}...",
+                            self.content[0..(width - 3)].to_string(),
+                        )
+                    );
+                }
             }
             // Wrap to multiple lines
             Wrap::Wrap => {

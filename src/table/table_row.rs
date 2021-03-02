@@ -61,12 +61,12 @@ impl TableRow {
     /// # Arguments
     /// 
     /// * `self` - The table row to format.
-    /// * `maximum_width` - The maximum render width.
+    /// * `border` - The table border.
+    /// * `column_breaks` - The breakpoints at which to wrap or truncate.
     pub fn format(
         self: &TableRow,
         border: &Border,
-        column_breaks: &Vec<ColumnBreak>,
-        maximum_width: usize
+        column_breaks: &Vec<ColumnBreak>
     ) -> String {
         let mut result: String = String::from("");
 
@@ -82,7 +82,7 @@ impl TableRow {
 
         // Iterate the number of lines
         let content_break = ColumnBreak { width: BreakWidth::Content };
-        for line_ix in 0..row_height {
+        for _line_ix in 0..row_height {
             // Left border
             result.push_str(&border.format_left());
             // Write the contents for the current line of the cell

@@ -100,12 +100,11 @@ impl Table {
     /// # Arguments
     ///
     /// * `self` - The table to format.
-    /// * `width` - The width in chars at which to wrap columns.
-    pub fn format(self: &Table, width: usize) -> String {
+    pub fn format(self: &Table) -> String {
         let mut result: String = String::from("");
 
         // Format header row
-        result.push_str(&self.format_header(width));
+        result.push_str(&self.format_header());
 
         // Format table body
         result.push_str(&self.format_body());
@@ -118,14 +117,13 @@ impl Table {
     /// # Arguments
     ///
     /// * `self` - The table containing the column headers to format.
-    /// * `width` - The width in chars at which to wrap columns.
-    fn format_header(self: &Table, width: usize) -> String {
+    fn format_header(
+        self: &Table
+    ) -> String {
         let mut result: String = String::from("");
 
         let header_width = self.measure_width();
-        let header_height = 
-            self.column_headers.measure_height(&self.column_breaks);
-
+        
         // Print top border
         result.push_str(&self.border.format_top(header_width));
         result.push_str("\n");
@@ -134,8 +132,7 @@ impl Table {
         result.push_str(
             &self.column_headers.format(
                 &self.border, 
-                &self.column_breaks, 
-                width
+                &self.column_breaks
             )
         );
 
@@ -167,11 +164,17 @@ impl Table {
         // Iterate rows
         for row_ix in 0..self.data_rows.len() {
             let row = &self.data_rows[row_ix];
-            result.push_str(&row.format(&self.border, &self.column_breaks, render_width));
+            result.push_str(
+                &row.format(
+                    &self.border, 
+                    &self.column_breaks
+                )
+            );
         
             // Print horizontal split beneath all but last row
             if row_ix < self.data_rows.len() - 1 {
-                result.push_str(&self.border.format_horizontal_split(render_width));
+                result.push_str(
+                    &self.border.format_horizontal_split(render_width));
                 result.push_str("\n");
             }
         }
@@ -197,7 +200,7 @@ impl Table {
         let mut header_width = 0;
 
         // Iterate through the header row
-        let column_break_ix = 0;
+        let mut column_break_ix = 0;
         let content_break = ColumnBreak { width: BreakWidth::Content };
         for cell in self.column_headers.iter() {
             // Get the next column break (if one is available)
@@ -210,6 +213,8 @@ impl Table {
                 };
             // Calculate the width of this header cell
             header_width += cell.measure_width(column_break);
+            // Increment column index
+            column_break_ix += 1;
         }
 
         // Add space for the outer borders

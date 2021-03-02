@@ -65,7 +65,7 @@ mod tests {
             data
         );
 
-        let output = table.format(80);
+        let output = table.format();
 
         let expected = String::from("+-------------------------------+\n|Food           |Count          |\n+-------------------------------+\n|Fish           |3              |\n+-------------------------------+\n|Apples         |5              |\n+-------------------------------+\n|Pizza          |13             |\n+-------------------------------+\n");
 

@@ -177,7 +177,7 @@ impl TableCell {
     fn measure_content_width(
         self: &TableCell
     ) -> usize {
-        let largest = 0;
+        let mut largest = 0;
         for content in &self.contents {
             let content_width = content.measure_width();
             if content_width > largest {

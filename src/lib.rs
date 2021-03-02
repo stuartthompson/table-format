@@ -15,30 +15,55 @@ mod tests {
     use super::*;
     use colored::Color;
     use content::{Content, Alignment, Wrap};
+    use table::column_break::{ColumnBreak, BreakWidth};
+    use table::table_row::TableRow;
+    use table::table_cell::TableCell;
 
     #[test]
     fn test_simple_vector_table() {
-        let mut data = VecDataSource::from(
+        let breaks = vec!(
+            ColumnBreak { width: BreakWidth::Fixed(15) },
+            ColumnBreak { width: BreakWidth::Fixed(10) }
+        );
+
+        let col_headers = TableRow::from(
+            vec!(
+                TableCell::from_data_item(
+                    DataItem::from(
+                        vec!(
+                            Content::new(
+                                String::from("Food"),
+                                Color::White,
+                                Alignment::Center,
+                                Wrap::NoWrap
+                            )
+                        )
+                    )
+                ),
+                TableCell::from_data_item(
+                    DataItem::from(
+                        vec!(
+                            Content::new(
+                                String::from("Count"),
+                                Color::White,
+                                Alignment::Center,
+                                Wrap::NoWrap
+                            )
+                        )
+                    )
+                )
+            )
+        );
+
+        let data = VecDataSource::from(
             vec!("FishFishFishFishFishFish", "3", "Apples", "5", "Pizza", "13"));
 
-        let food_header = Content::new(
-            String::from("Food"),
-            Color::White,
-            Alignment::Center,
-            Wrap::NoWrap
+        let table = Table::from_vec_data_source(
+            breaks,
+            col_headers,
+            Vec::new(),
+            data
         );
-        let count_header = Content::new(
-            String::from("Count"),
-            Color::White,
-            Alignment::Center,
-            Wrap::NoWrap
-        );
-
-        let columns = vec!(
-            TableColumn::fixed(food_header, 15),
-            TableColumn::fixed(count_header, 15),
-        );
-        let table = Table::from(&mut data, columns);
 
         let output = table.format(80);
 

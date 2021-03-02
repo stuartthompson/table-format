@@ -69,6 +69,17 @@ impl Content {
         }
     } 
 
+    pub fn from_string(
+        content: String
+    ) -> Content {
+        Content {
+            content,
+            color: Color::White,
+            alignment: Alignment::Left,
+            wrap: Wrap::NoWrap
+        }
+    }
+
     /// Returns an iterator for the line parts of a content.
     /// 
     /// # Arguments
@@ -88,7 +99,7 @@ impl Content {
             Wrap::NoWrap => {
                 result.push(
                     format!("{}...",
-                        self.content[0..(width - 3 )].to_string(),
+                        self.content[0..(content_len - 3)].to_string(),
                     )
                 );
             }

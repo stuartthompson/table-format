@@ -1,12 +1,15 @@
 mod border;
-mod column_break;
-mod table_cell;
-mod table_row;
+pub mod column_break;
+pub mod table_row;
+pub mod table_cell;
 
 use border::Border;
 use column_break::{ColumnBreak, BreakWidth};
 use table_cell::TableCell;
 use table_row::TableRow;
+use super::content::Content;
+use super::data_item::DataItem;
+use super::VecDataSource;
 
 pub struct Table {
     border: Border,
@@ -53,17 +56,56 @@ impl Table {
         }
     }
 
+    pub fn from_vec_data_source(
+        column_breaks: Vec<ColumnBreak>,
+        column_headers: TableRow,
+        row_headers: Vec<TableCell>,
+        data_source: VecDataSource<&str>,
+    ) -> Table {
+
+        let mut data_rows = Vec::new();
+        
+        // Create a new row
+        let mut row_ix = 0;
+        data_rows.push(TableRow::new());
+
+        let mut break_ix = 0;
+
+        for item in data_source {
+            // Add a new row if needed
+            if break_ix == column_breaks.len() {
+                break_ix = 0;
+                data_rows.push(TableRow::new());
+                row_ix += 1;
+            }
+
+            data_rows[row_ix].add_cell(
+                TableCell::from_data_item(item)
+            );
+
+            break_ix += 1;
+        }
+
+        Table {
+            border: Border::default(),
+            column_breaks,
+            column_headers,
+            row_headers,
+            data_rows
+        }
+    }
+
     /// Returns the contents of a table formatted as a string.
     ///
     /// # Arguments
     ///
     /// * `self` - The table to format.
     /// * `width` - The width in chars at which to wrap columns.
-    pub fn format(self: &Table, width: u8) -> String {
+    pub fn format(self: &Table, width: usize) -> String {
         let mut result: String = String::from("");
 
         // Format header row
-        result.push_str(&self.format_header(width: u8));
+        result.push_str(&self.format_header(width));
 
         // Format table body
         result.push_str(&self.format_body());
@@ -77,7 +119,7 @@ impl Table {
     ///
     /// * `self` - The table containing the column headers to format.
     /// * `width` - The width in chars at which to wrap columns.
-    fn format_header(self: &Table, width: u8) -> String {
+    fn format_header(self: &Table, width: usize) -> String {
         let mut result: String = String::from("");
 
         let header_width = self.measure_width();

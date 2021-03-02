@@ -39,6 +39,10 @@ impl TableRow {
         TableRow { cells }
     }
 
+    pub fn add_cell(&mut self, cell: TableCell) {
+        self.cells.push(cell);
+    }
+
     pub fn iter(
         self: &TableRow,
     ) -> CellIterator {
@@ -73,30 +77,37 @@ impl TableRow {
         for cell_ix in 0..self.cells.len() {
             let cell = &self.cells[cell_ix];
             let column_break = &column_breaks[cell_ix];
-            content_iterators.push(cell.get_iterator(column_break.measure_width()));
+            content_iterators.push(cell.get_iterator(&column_break));    
         }
 
         // Iterate the number of lines
+        let content_break = ColumnBreak { width: BreakWidth::Content };
         for line_ix in 0..row_height {
             // Left border
             result.push_str(&border.format_left());
             // Write the contents for the current line of the cell
             for cell_ix in 0..self.cells.len() {
                 let cell = &self.cells[cell_ix];
-                let column = &columns[cell_ix];
+                let column_break: &ColumnBreak =
+                    if cell_ix < column_breaks.len() {
+                        &column_breaks[cell_ix]
+                    } else {
+                        &content_break
+                    };
                 result.push_str(
                     &match content_iterators[cell_ix].next() {
                         Some(content) => format!("{}", content),
                         None => {
                             // No more lines so fill height with empty space
-                            format!("{}", (0..column.measure_width())
+                            let cell_width = cell.measure_width(column_break);
+                            format!("{}", (0..cell_width)
                                 .map(|_| " ")
                                 .collect::<String>())
                         }
                     }
                 );
                 // Vertical split (except for final column)
-                if cell_ix < columns.len() - 1 {
+                if cell_ix < column_breaks.len() - 1 {
                     result.push_str(&border.format_vertical_split());
                 }
             }

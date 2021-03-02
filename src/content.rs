@@ -1,6 +1,8 @@
 use colored::Color;
 
 /// Describes how content should be aligned.
+#[derive(Debug)]
+#[derive(PartialEq)]
 pub enum Alignment {
     Left,
     Center,
@@ -36,6 +38,17 @@ impl Iterator for ContentIterator {
             None
         }
     }
+}
+
+macro_rules! content {
+    (L $content:expr) => {
+        Content::new(
+            $content,
+            Color::White,
+            Alignment::Left,
+            Wrap::Wrap
+        )
+    };
 }
 
 /// Represents a line of content.
@@ -255,10 +268,24 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_content_macro_left() {
+        let content = content!(L "testing".to_string());
+
+        assert_eq!(content.alignment, Alignment::Left);
+    }
+
+    #[test]
     fn test_measure_width() {
         let content = Content::from_string("testing".to_string());
 
         assert_eq!(7, content.measure_width());
+    }
+
+    #[test]
+    fn test_pad_left_aligned() {
+        let padded = Content::pad("testing", &Alignment::Left, 10);
+
+        assert_eq!(padded, "testing   ");
     }
 
 }

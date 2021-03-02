@@ -273,6 +273,7 @@ mod tests {
     #[test]
     fn measure_header_two_columns() {
         let breaks = vec!(
+            ColumnBreak { width: BreakWidth::Fixed(15) },
             ColumnBreak { width: BreakWidth::Fixed(15) }
         );
 

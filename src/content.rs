@@ -249,3 +249,16 @@ impl Content {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_measure_width() {
+        let content = Content::from_string("testing".to_string());
+
+        assert_eq!(7, content.measure_width());
+    }
+
+}

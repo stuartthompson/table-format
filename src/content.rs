@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use colored::Color;
 
 /// Describes how content should be aligned.
@@ -10,6 +11,7 @@ pub enum Alignment {
 }
 
 /// Describes whether content will wrap or truncate.
+#[derive(Debug)]
 pub enum Wrap {
     /// Content will be truncated when over-width
     NoWrap,
@@ -41,22 +43,21 @@ impl Iterator for ContentIterator {
 }
 
 macro_rules! content {
-    (L $content:expr) => {
-        Content::new(
-            $content,
-            Color::White,
-            Alignment::Left,
-            Wrap::Wrap
-        )
+    ($c: ident, $style:tt, $content:expr) => {
+        $c.add_lines(stringify!($style), $content);
+    };
+    ($c: ident, $style:tt, $($content_rest:expr),*) => {
+        content!($c, $style, vec!($($content_rest),*));
     };
 }
 
 /// Represents a line of content.
+#[derive(Debug)]
 pub struct Content {
     content: String,
     color: Color,
     alignment: Alignment,
-    wrap: Wrap 
+    wrap: Wrap,
 }
 
 impl Content {
@@ -81,6 +82,62 @@ impl Content {
             wrap
         }
     } 
+
+    pub fn add_content_line(
+        line: &str
+    ) {
+        println!("Content: {}", line);
+    }
+
+    // pub fn add_content_line(
+    //     style: &str, 
+    //     line: &str
+    // ) {
+    //     println!("Adding line: Style: {}, Line: {}", style, line);
+    // }
+
+    pub fn from_form1(
+        style: &str,
+        content: &str,
+    ) -> Content {
+        println!("Content: {}", content);
+        println!("Style: {}", style);
+
+        Content::new(
+            format!("{} {}", content, style),
+            Color::Red,
+            Alignment::Left,
+            Wrap::Wrap
+        )
+    }
+
+    pub fn from_tokens(
+        content: &str,
+        tokens: &str
+    ) -> Content {
+
+        // Extract color
+        let color = match tokens[1..tokens.len()-1].find(':') {
+            Some(colon_index) => {
+                let color_token = &tokens[1..colon_index].trim();
+                match *color_token {
+                    "Red" => { Color::Red },
+                    "Blue" => { Color::Blue },
+                    _ => { Color::White }
+                }
+            },
+            None => {
+                Color::White
+            }
+        };
+
+        Content::new( 
+            format!("Content: {}", content),
+            color,
+            Alignment::Left,
+            Wrap::Wrap
+        )
+    }
 
     pub fn from_string(
         content: String
@@ -272,6 +329,24 @@ mod tests {
         let content = content!(L "testing".to_string());
 
         assert_eq!(content.alignment, Alignment::Left);
+    }
+
+    #[test]
+    fn test_tcon_align_left() {
+        let content = tcon!({Red:<W}, "testing");
+
+        println!("{:?}", content);
+
+        assert_eq!(content.alignment, Alignment::Left);
+    }
+
+    #[test]
+    fn test_tcon_form1() {
+        let content = tcon2!("{r:<;W} {b:^} {w:^;w}", "testing", "hello", "a");
+
+        //println!("{:?}", content);
+
+        //assert_eq!(content.alignment, Alignment::Left);
     }
 
     #[test]

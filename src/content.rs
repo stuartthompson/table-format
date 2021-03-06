@@ -51,6 +51,12 @@ macro_rules! content {
     };
 }
 
+pub struct ContentStyle {
+    color: Color,
+    alignment: Alignment,
+    Wrap: Wrap,
+}
+
 /// Represents a line of content.
 #[derive(Debug)]
 pub struct Content {
@@ -83,38 +89,37 @@ impl Content {
         }
     } 
 
-    pub fn add_content_line(
-        line: &str
-    ) {
-        println!("Content: {}", line);
-    }
-
-    // pub fn add_content_line(
-    //     style: &str, 
-    //     line: &str
-    // ) {
-    //     println!("Adding line: Style: {}, Line: {}", style, line);
-    // }
-
-    pub fn from_form1(
-        style: &str,
-        content: &str,
-    ) -> Content {
-        println!("Content: {}", content);
-        println!("Style: {}", style);
-
-        Content::new(
-            format!("{} {}", content, style),
-            Color::Red,
-            Alignment::Left,
-            Wrap::Wrap
-        )
-    }
-
     pub fn from_tokens(
+        style_tokens: &str,
         content: &str,
-        tokens: &str
     ) -> Content {
+
+        // Remove the first and last chars
+        let tokens = &style_tokens[1..style_tokens.len() - 1];
+
+        for token in tokens.chars() {
+            // Check for color codes
+            let color_code = match token {
+                'w' | 'W' => Some(Color::White),
+                'r' | 'R' => Some(Color::Red),
+                _ => None,
+            };
+
+            // If no color code found, check if it is an alignment token
+            if color_code == None {
+                let align_code = match token {
+                    '<' => Some(Alignment::Left),
+                    '^' => Some(Alignment::Center),
+                    '>' => Some(Alignment::Right),
+                    _ => None
+                };
+            }
+
+            // If no alignment token found, check for wrap token
+            if align_code == None {
+
+            }
+        }
 
         // Extract color
         let color = match tokens[1..tokens.len()-1].find(':') {
@@ -326,7 +331,7 @@ mod tests {
 
     #[test]
     fn test_content_macro_left() {
-        let content = content!(L "testing".to_string());
+        let content = content!("{w<W}", "testing");
 
         assert_eq!(content.alignment, Alignment::Left);
     }

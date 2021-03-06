@@ -28,8 +28,8 @@ mod tests {
 
         let col_headers = TableRow::from(
             vec!(
-                cell!("{r>}", "Food", "t"),
-                cell!("{b^}", "Count", "t"),
+                cell!("{c>} {G-r<}", "Food", "t"),
+                cell!("{}", "Count", "t"),
             )
         );
 

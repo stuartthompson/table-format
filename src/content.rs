@@ -102,9 +102,10 @@ impl ContentStyle {
 
         // Iterate tokens
         let tokens: Vec<char> = format[1..format.len() - 1].chars().collect();
-        for mut token_ix in 0..tokens.len() {
+        let mut token_ix = 0;
+        while token_ix < tokens.len() {
             let token = tokens[token_ix];
-
+           
             // Foreground color
             match ContentStyle::color_from_token(token) {
                 Some(color) => style.fg_color = Some(color),
@@ -131,7 +132,10 @@ impl ContentStyle {
                     token_ix += 1;
                 }
             }
+            token_ix += 1;
         }
+
+        println!("Style is: {:?}", style);
 
         style
     }
@@ -272,7 +276,7 @@ impl Content {
             result = result.color(style.fg_color.unwrap()).to_string();
         }
         if style.bg_color != None {
-            result = result.color(style.bg_color.unwrap()).to_string();
+            result = result.on_color(style.bg_color.unwrap()).to_string();
         }
 
         result   

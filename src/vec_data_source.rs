@@ -1,6 +1,6 @@
 use super::data_item::DataItem;
 use colored::Color;
-use super::content::{Content, Alignment, Wrap};
+use super::content::{Content, ContentStyle};
 
 pub struct VecDataSource<T> {
     current_ix: usize,
@@ -22,9 +22,7 @@ impl<T> Iterator for VecDataSource<T>
 
             let content = Content::new(
                 format!("{}", self.data[self.current_ix]),
-                Color::White,
-                Alignment::Left,
-                Wrap::Wrap
+                ContentStyle::default(),
             );
 
             let item = DataItem {

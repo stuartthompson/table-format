@@ -1,4 +1,4 @@
-use crate::content::{Content, ContentIterator};
+use crate::content::{Content, ContentIterator, ContentStyle};
 use super::column_break::{ColumnBreak, BreakWidth};
 use crate::data_item::DataItem;
 
@@ -64,11 +64,22 @@ impl<'a> Iterator for TableCellContentIterator<'a> {
     }
 }
 
+#[allow(unused_macros)]
+#[macro_export]
+macro_rules! cell {
+    ($style:tt, $content:expr) => {
+        TableCell::from_styled_content(stringify!($style), $content);
+    };
+    ($style:tt, $($content_rest:expr),*) => {
+        cell!($style, vec!($($content_rest),*));
+    };
+}
+
 /// A table cell represents a single grid rectangle within a table.
 /// 
 /// Cells belong to a row.
 pub struct TableCell {
-    pub contents: Vec<Content>
+    contents: Vec<Content>
 }
 
 impl TableCell {
@@ -76,6 +87,45 @@ impl TableCell {
         TableCell {
             contents: Vec::new()
         }
+    }
+
+    pub fn from_contents(
+        contents: Vec<String>,
+    ) -> TableCell {
+        let mut table_cell = TableCell::new();
+        for content in contents {
+            table_cell.contents.push(
+                Content::new(content, ContentStyle::default())
+            );
+        }
+        table_cell
+    }
+
+    pub fn from_styled_content(
+        format: &str,
+        contents: Vec<&str>,
+    ) -> TableCell {
+        // Split the format string into style tokens
+        let styles: Vec<&str> = 
+            format[1..format.len() - 1].split(" ").collect();
+        let mut style_ix = 0;
+        let mut table_cell = TableCell::new();
+
+        // Iterate the contents
+        for content in contents {
+            // Get next style (use default if no more styles provided)
+            let style = 
+                if style_ix < styles.len() { 
+                    ContentStyle::from_format(styles[style_ix]) }
+                else { ContentStyle::default() };
+            
+            // Add the new styled content
+            table_cell.contents.push(
+                Content::new(content.to_string(), style));
+
+            style_ix += 1;
+        }
+        table_cell
     }
 
     /// Returns a TableCell from a DataItem.
@@ -187,4 +237,31 @@ impl TableCell {
 
         largest  
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use colored::Color;
+    use crate::content::{Alignment, Wrap};
+    
+    #[test]
+    fn test_table_cell_macro() {
+        let tc = cell!("{r<;} {G-b^}", "testing", "this");
+
+        assert_eq!(tc.contents.len(), 2);
+
+        assert_eq!(format!("{:?}", tc.contents[0]), 
+            format!("{:?}", Content::new( 
+                "testing".to_string(),
+                ContentStyle::new(
+                    Some(Color::Red),
+                    None,
+                    Alignment::Left,
+                    Wrap::Wrap
+                )
+            ))
+        );
+    }
+
 }

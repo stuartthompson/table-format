@@ -28,30 +28,8 @@ mod tests {
 
         let col_headers = TableRow::from(
             vec!(
-                TableCell::from_data_item(
-                    DataItem::from(
-                        vec!(
-                            Content::new(
-                                String::from("Food"),
-                                Color::White,
-                                Alignment::Center,
-                                Wrap::NoWrap
-                            )
-                        )
-                    )
-                ),
-                TableCell::from_data_item(
-                    DataItem::from(
-                        vec!(
-                            Content::new(
-                                String::from("Count"),
-                                Color::White,
-                                Alignment::Center,
-                                Wrap::NoWrap
-                            )
-                        )
-                    )
-                )
+                cell!("{r>}", "Food", "t"),
+                cell!("{b^}", "Count", "t"),
             )
         );
 
@@ -69,9 +47,9 @@ mod tests {
 
         let expected = String::from("+--------------------------+\n|     Food      |  Count   |\n+--------------------------+\n|FishFishFishFis|3         |\n|hFishFish      |          |\n+--------------------------+\n|Apples         |5         |\n+--------------------------+\n|Pizza          |13        |\n+--------------------------+\n");
 
-        // println!("1-------10--------20--------30--------40--------50--------60--------70--------80");
-        // println!("''''5''''|''''5''''|''''5''''|''''5''''|''''5''''|''''5''''|''''5''''|''''5''''|");
-        // println!("{}", output);
+        println!("1-------10--------20--------30--------40--------50--------60--------70--------80");
+        println!("''''5''''|''''5''''|''''5''''|''''5''''|''''5''''|''''5''''|''''5''''|''''5''''|");
+        println!("{}", output);
 
         assert_eq!(expected, output);
     }

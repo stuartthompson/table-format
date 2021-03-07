@@ -1,5 +1,9 @@
 # Table-Format
 
+[<img alt="github" src="https://img.shields.io/badge/github-stuartthompson/table--format-8da0cb?style=for-the-badge&labelColor=555555&logo=github" height="20">](https://github.com/stuartthompson/table-format)
+[<img alt="crates.io" src="https://img.shields.io/crates/v/table-format.svg?style=for-the-badge&color=fc8d62&logo=rust" height="20">](https://crates.io/crates/table-format)
+[<img alt="build status" src="https://img.shields.io/github/workflow/status/stuartthompson/table-format/CI/master?style=for-the-badge" height="20">](https://github.com/stuartthompson/table-format/actions?query=branch%3Amaster)
+
 This crate formats data as a text table, suitable for printing to the terminal 
 or for inclusion in logs.
 
@@ -8,31 +12,36 @@ or for inclusion in logs.
 v0.0.1 - Initial files. Tests are passing. Table header formats.
 
 ## Roadmap
-
-v0.0.2 - Format table data rows. Expand testing.
-v0.0.3 - Documentation cleanup pass. Get what is there clean and tidy.
+v0.0.2 - Macros for table, row, and cell.
+v0.0.3 - Color codes supported across all elements.
+v0.0.5 - Format table data rows. Expand testing.
+v0.1.0 - Documentation cleanup pass. Get what is there clean and tidy.
 
 ## Examples
 
 The following code prints a two-column table from a vector of strings:
 
 ```
-let mut data = VecDataSource::from(
-    vec!("Fish", "3", "Apples", "5", "Pizza", "13"));
+let table = 
+    table!(
+        breaks!(b!(F(15)), b!(F(10))), 
+        row!("{c^}", "Food", "Count"), 
+        "Fish", "3", "Pears", "5", "Pizza", "13"
+    );
 
-let columns = vec!(
-    TableColumn::fixed("Food".to_string(), 15),
-    TableColumn::fixed("Count".to_string(), 15),
-);
-let table = Table::from(&mut data, columns);
-
-let output = table.format(80);
+let output = table.format();
 ```
 
 Output:
 
 ```
-+-------------------------------+
-|Food           |Count          |
-+-------------------------------+
++--------------------------+
+|     Food      |  Count   |
++--------------------------+
+|Fish           |3         |
++--------------------------+
+|Pears          |5         |
++--------------------------+
+|Pizza          |13        |
++--------------------------+
 ```

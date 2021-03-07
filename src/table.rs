@@ -11,6 +11,34 @@ use super::content::Content;
 use super::data_item::DataItem;
 use super::VecDataSource;
 
+#[allow(unused_macros)]
+#[macro_export]
+macro_rules! table {
+    ($breaks:expr, $headers:expr, $($content:expr),*) => {{
+        let mut data = Vec::new();
+        $( data.push($content); )*
+        Table::from_vec_with_headers(
+            $breaks,
+            $headers,
+            data
+        )
+    }};
+}
+    // ($( $style:expr => $content:expr ),*) => {
+    //     {
+    //         let mut tr = TableRow::new();
+    //         $( tr.add_cell(crate::cell!($style, $content)); )*
+    //         tr
+    //     }
+    // };
+    // ($style:expr, $($content:expr),*) => {
+    //     {
+    //         let mut tr = TableRow::new();
+    //         $( tr.add_cell(crate::cell!($style, $content)); )*
+    //         tr
+    //     }
+    // };
+
 pub struct Table {
     border: Border,
     column_breaks: Vec<ColumnBreak>,
@@ -54,6 +82,19 @@ impl Table {
             row_headers,
             data_rows
         }
+    }
+
+    pub fn from_vec_with_headers(
+        column_breaks: Vec<ColumnBreak>,
+        column_headers: TableRow,
+        data: Vec<&str>
+    ) -> Table {
+        Table::from_vec_data_source(
+            column_breaks,
+            column_headers,
+            Vec::new(),
+            VecDataSource::from(data)
+        )
     }
 
     pub fn from_vec_data_source(

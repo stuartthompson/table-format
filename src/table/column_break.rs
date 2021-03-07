@@ -77,10 +77,6 @@ mod tests {
 
     #[test]
     fn test_breaks_macro() {
-        let b1 = b!(F(15));
-        let b2 = b!(M(25));
-        let b3 = b!(C);
-
         let b = breaks!(b!(F(15)), b!(M(25)), b!(C), b!(F(18)));
         assert_eq!(
             format!("{:?}", b),

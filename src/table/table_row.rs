@@ -26,14 +26,14 @@ impl<'a> Iterator for CellIterator<'a> {
 macro_rules! row {
     ($( $style:expr => $content:expr ),*) => {
         {
-            let mut tr = TableRow::new();
+            let mut tr: TableRow = TableRow::new();
             $( tr.add_cell(crate::cell!($style, $content)); )*
             tr
         }
     };
     ($style:expr, $($content:expr),*) => {
         {
-            let mut tr = TableRow::new();
+            let mut tr: TableRow = TableRow::new();
             $( tr.add_cell(crate::cell!($style, $content)); )*
             tr
         }

@@ -21,7 +21,27 @@ impl<'a> Iterator for CellIterator<'a> {
     }
 }
 
+#[allow(unused_macros)]
+#[macro_export]
+macro_rules! row {
+    ($( $style:expr => $content:expr ),*) => {
+        {
+            let mut tr = TableRow::new();
+            $( tr.add_cell(crate::cell!($style, $content)); )*
+            tr
+        }
+    };
+    ($style:expr, $($content:expr),*) => {
+        {
+            let mut tr = TableRow::new();
+            $( tr.add_cell(crate::cell!($style, $content)); )*
+            tr
+        }
+    };
+}
+
 /// Table rows represent horizontal breakpoints.
+#[derive(Debug)]
 pub struct TableRow {
     cells: Vec<TableCell>
 }
@@ -150,5 +170,38 @@ impl TableRow {
         }
 
         tallest_height
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_row_macro_style_per_cell() {
+        assert_eq!(
+            format!("{:?}", row!("{c^}" => "Head 1", "{G-r>}" => "Head 2")),
+            format!("{:?}", TableRow::from(
+                vec!(
+                    crate::cell!("{c^}", "Head 1"),
+                    crate::cell!("{G-r>}", "Head 2")
+                )
+            ))
+        );
+    }
+
+    #[test]
+    fn test_row_macro_common_style() {
+        assert_eq!(
+            format!("{:?}", row!("{c^}", "Text 1", "Text 2", "Text 3")),
+            format!("{:?}", TableRow::from(
+                vec!(
+                    crate::cell!("{c^}", "Text 1"),
+                    crate::cell!("{c^}", "Text 2"),
+                    crate::cell!("{c^}", "Text 3")
+                )
+            ))
+        );
     }
 }

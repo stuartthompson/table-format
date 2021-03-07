@@ -75,7 +75,7 @@ macro_rules! cell_content {
 #[allow(unused_macros)]
 #[macro_export]
 macro_rules! cell {
-    ($style:expr, $($content:tt)*)=> {
+    ($style:expr, $($content:tt)*) => {
         TableCell::from_styled_content(
             $style, 
             crate::cell_content!($($content)*)
@@ -86,6 +86,7 @@ macro_rules! cell {
 /// A table cell represents a single grid rectangle within a table.
 /// 
 /// Cells belong to a row.
+#[derive(Debug)]
 pub struct TableCell {
     contents: Vec<Content>
 }

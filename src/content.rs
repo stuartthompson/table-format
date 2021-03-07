@@ -1,18 +1,43 @@
-use colored::Color;
+use std::fmt::Display;
+use colored::{Color, Colorize};
 
 /// Describes how content should be aligned.
+#[derive(Debug)]
+#[derive(PartialEq)]
 pub enum Alignment {
     Left,
     Center,
     Right
 }
 
+impl Alignment {
+    fn from_token(token: char) -> Option<Alignment> {
+        match token {
+            '<' => Some(Alignment::Left),
+            '^' => Some(Alignment::Center),
+            '>' => Some(Alignment::Right),
+            _ => None
+        }
+    }
+}
+
 /// Describes whether content will wrap or truncate.
+#[derive(Debug)]
 pub enum Wrap {
     /// Content will be truncated when over-width
-    NoWrap,
+    Truncate,
     // Content will wrap when over-width
     Wrap
+}
+
+impl Wrap {
+    fn from_token(token: char) -> Option<Wrap> {
+        match token {
+            ';' => Some(Wrap::Wrap),
+            '.' => Some(Wrap::Truncate),
+            _ => None
+        }
+    }
 }
 
 pub struct ContentIterator {
@@ -38,12 +63,111 @@ impl Iterator for ContentIterator {
     }
 }
 
+/// Represents the style to apply to a line of content.
+#[derive(Debug)]
+pub struct ContentStyle {
+    fg_color: Option<Color>,
+    bg_color: Option<Color>,
+    alignment: Alignment,
+    wrap: Wrap,
+}
+
+impl ContentStyle {
+    pub fn default() -> ContentStyle {
+        ContentStyle {
+            fg_color: None,
+            bg_color: None,
+            alignment: Alignment::Left,
+            wrap: Wrap::Truncate
+        }
+    }
+
+    pub fn new(
+        fg_color: Option<Color>,
+        bg_color: Option<Color>,
+        alignment: Alignment,
+        wrap: Wrap
+    ) -> ContentStyle {
+        ContentStyle {
+            fg_color,
+            bg_color,
+            alignment,
+            wrap,
+        }
+    }
+
+    pub fn from_format(format: &str) -> ContentStyle {
+        // Start with defaults
+        let mut style = ContentStyle::default();
+
+        // Iterate tokens
+        let tokens: Vec<char> = format[1..format.len() - 1].chars().collect();
+        let mut token_ix = 0;
+        while token_ix < tokens.len() {
+            let token = tokens[token_ix];
+           
+            // Foreground color
+            match ContentStyle::color_from_token(token) {
+                Some(color) => style.fg_color = Some(color),
+                None => {}
+            }
+            // Alignment
+            match Alignment::from_token(token) {
+                Some(alignment) => style.alignment = alignment,
+                None => {}
+            }
+            // Wrap
+            match Wrap::from_token(token) {
+                Some(wrap) => style.wrap = wrap,
+                None => {}
+            }
+
+            // Background color (consumes two tokens)
+            if token == '-' {
+                // Avoid problem if - is last token (with no color code)
+                if tokens.len() > token_ix + 1 {
+                    style.bg_color = 
+                        ContentStyle::color_from_token(tokens[token_ix + 1]);
+                    // Consume next token (to skip the background color code)
+                    token_ix += 1;
+                }
+            }
+            token_ix += 1;
+        }
+
+        style
+    }
+
+    fn color_from_token(
+        token: char
+    ) -> Option<Color> {
+        match token {
+            'w' => Some(Color::White),
+            'l' => Some(Color::Black),
+            'r' => Some(Color::Red),
+            'g' => Some(Color::Green),
+            'y' => Some(Color::Yellow),
+            'b' => Some(Color::Blue),
+            'm' => Some(Color::Magenta),
+            'c' => Some(Color::Cyan),
+            'W' => Some(Color::BrightWhite),
+            'L' => Some(Color::BrightBlack),
+            'R' => Some(Color::BrightRed),
+            'G' => Some(Color::BrightGreen),
+            'Y' => Some(Color::BrightYellow),
+            'B' => Some(Color::BrightBlue),
+            'M' => Some(Color::BrightMagenta),
+            'C' => Some(Color::BrightCyan),
+            _ => None,
+        }
+    }
+}
+
 /// Represents a line of content.
+#[derive(Debug)]
 pub struct Content {
     content: String,
-    color: Color,
-    alignment: Alignment,
-    wrap: Wrap 
+    style: ContentStyle,
 }
 
 impl Content {
@@ -57,17 +181,22 @@ impl Content {
     /// * `wrap` - The content wrapping method.
     pub fn new(
         content: String,
-        color: Color, 
-        alignment: Alignment, 
-        wrap: Wrap
+        style: ContentStyle,
     ) -> Content {
         Content {
             content,
-            color,
-            alignment,
-            wrap
+            style
         }
     } 
+
+    pub fn from_string(
+        content: String
+    ) -> Content {
+        Content {
+            content,
+            style: ContentStyle::default(),
+        }
+    }
 
     /// Returns an iterator for the line parts of a content.
     /// 
@@ -83,15 +212,28 @@ impl Content {
 
         let mut result: Vec<String> = Vec::new();
 
-        match self.wrap {
+        match self.style.wrap {
             // Truncate on single line
-            Wrap::NoWrap => {
-                result.push(
-                    format!("{}...",
-                        self.content[0..(width - 3 )].to_string(),
-                    )
-                );
-            }
+            Wrap::Truncate => {
+                // Pad or truncate
+                if content_len <= width {
+                    result.push(
+                        Content::format(
+                            &self.content,
+                            &self.style, 
+                            width
+                        )
+                    );
+                } else {
+                    result.push(
+                        Content::format(
+                            &self.content[0..(width - 3)],
+                            &self.style,
+                            width
+                        )
+                    );
+                }
+            },
             // Wrap to multiple lines
             Wrap::Wrap => {
                 let num_lines = self.measure_height(width);
@@ -105,19 +247,37 @@ impl Content {
                         else { from + partial_line_len };
                 
                     result.push(
-                        Content::pad(
+                        Content::format(
                             &self.content[from..to], 
-                            &self.alignment, 
+                            &self.style, 
                             width)
-                        )
+                    );
                 }
-            }
+            },
         }
 
         ContentIterator {
             parts: result,
             next_part_ix: 0
         }
+    }
+
+    fn format(
+        line: &str,
+        style: &ContentStyle,
+        width: usize
+    ) -> String {
+        let mut result = Content::pad(line, &style.alignment, width);
+
+        // Apply colors
+        if style.fg_color != None {
+            result = result.color(style.fg_color.unwrap()).to_string();
+        }
+        if style.bg_color != None {
+            result = result.on_color(style.bg_color.unwrap()).to_string();
+        }
+
+        result   
     }
 
     fn pad(
@@ -221,9 +381,16 @@ impl Content {
     pub fn will_wrap(
         self: &Content
     ) -> bool {
-        match self.wrap {
+        match self.style.wrap {
             Wrap::Wrap => true,
-            Wrap::NoWrap => false
+            Wrap::Truncate => false
         }
     }
+}
+
+#[cfg(test)]
+mod tests {
+
+
+
 }

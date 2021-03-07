@@ -20,10 +20,10 @@ pub struct ColumnBreak {
 #[allow(unused_macros)]
 #[macro_export]
 macro_rules! b {
-    (F($w:tt)) => {
+    (F($w:expr)) => {
         BreakWidth::Fixed($w)
     };
-    (M($w:tt)) => {
+    (M($w:expr)) => {
         BreakWidth::Minimum($w)
     };
     (C) => {
@@ -34,26 +34,27 @@ macro_rules! b {
 #[allow(unused_macros)]
 #[macro_export]
 macro_rules! breaks {
-    ($( $b:tt ),*) => {{
+    ($( $b:expr ),*) => {{
         let mut v = Vec::new();
-        $( v.push(ColumnBreak { width: b!($b) }); )*
+        $( v.push(ColumnBreak { width: $b }); )*
+        // $( println!("{:?}", $b); )*
         v
     }};
 } 
 
-#[allow(unused_macros)]
-#[macro_export]
-macro_rules! bks {
-    ($(F($f:tt)),*, $(M($m:tt)),*, $(C),*) => {{
-        let mut v = Vec::new();
-        $( 
-            v.push(ColumnBreak { width: BreakWidth::Fixed($f) }); 
-            v.push(ColumnBreak { width: BreakWidth::Minimum($m) });
-            v.push(ColumnBreak { width: BreakWidth::Content });
-        )*
-        v
-    }};
-}
+// #[allow(unused_macros)]
+// #[macro_export]
+// macro_rules! bks {
+//     ($(F($f:tt)),*, $(M($m:tt)),*, $(C),*) => {{
+//         let mut v = Vec::new();
+//         $( 
+//             v.push(ColumnBreak { width: BreakWidth::Fixed($f) }); 
+//             v.push(ColumnBreak { width: BreakWidth::Minimum($m) });
+//             v.push(ColumnBreak { width: BreakWidth::Content });
+//         )*
+//         v
+//     }};
+// }
 
     // ($( $style:expr => $content:expr ),*) => {
     //     {
@@ -80,7 +81,7 @@ mod tests {
         let b2 = b!(M(25));
         let b3 = b!(C);
 
-        let b = bks!(F(15), F(8), M(25), M(3), C, C);
+        let b = breaks!(b!(F(15)), b!(M(25)), b!(C), b!(F(18)));
         assert_eq!(
             format!("{:?}", b),
             format!("{:?}", 
@@ -88,6 +89,7 @@ mod tests {
                     ColumnBreak { width: BreakWidth::Fixed(15)},
                     ColumnBreak { width: BreakWidth::Minimum(25)},
                     ColumnBreak { width: BreakWidth::Content},
+                    ColumnBreak { width: BreakWidth::Fixed(18)},
                 )    
             )
         );

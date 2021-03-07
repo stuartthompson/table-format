@@ -243,7 +243,7 @@ mod tests {
 
         let col_headers = TableRow::from(
             vec!(
-                cell!("{^}", "test", "hello")
+                cell!("{r^} {G-r<}", "test", "hello")
             )
         );
 

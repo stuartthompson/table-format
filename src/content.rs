@@ -135,8 +135,6 @@ impl ContentStyle {
             token_ix += 1;
         }
 
-        println!("Style is: {:?}", style);
-
         style
     }
 
@@ -392,45 +390,7 @@ impl Content {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
 
-    // #[test]
-    // fn test_content_macro() {
-    //     let content = c2!("{w<+}", "testing");
 
-    //     assert_eq!(content.alignment, Alignment::Left);
-    // }
-
-    // #[test]
-    // fn test_tcon_align_left() {
-    //     let content = tcon!({Red:<W}, "testing");
-
-    //     println!("{:?}", content);
-
-    //     assert_eq!(content.alignment, Alignment::Left);
-    // }
-
-    // #[test]
-    // fn test_tcon_form1() {
-    //     let content = tcon2!("{r:<;W} {b:^} {w:^;w}", "testing", "hello", "a");
-
-    //     //println!("{:?}", content);
-
-    //     //assert_eq!(content.alignment, Alignment::Left);
-    // }
-
-    // #[test]
-    // fn test_measure_width() {
-    //     let content = Content::from_string("testing".to_string());
-
-    //     assert_eq!(7, content.measure_width());
-    // }
-
-    // #[test]
-    // fn test_pad_left_aligned() {
-    //     let padded = Content::pad("testing", &Alignment::Left, 10);
-
-    //     assert_eq!(padded, "testing   ");
-    // }
 
 }

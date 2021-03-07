@@ -66,13 +66,21 @@ impl<'a> Iterator for TableCellContentIterator<'a> {
 
 #[allow(unused_macros)]
 #[macro_export]
+macro_rules! cell_content {
+    ($($out:tt)*) => {
+        vec!($($out)*)
+    };
+}
+
+#[allow(unused_macros)]
+#[macro_export]
 macro_rules! cell {
-    ($style:tt, $content:expr) => {
-        TableCell::from_styled_content(stringify!($style), $content);
-    };
-    ($style:tt, $($content_rest:expr),*) => {
-        cell!($style, vec!($($content_rest),*));
-    };
+    ($style:expr, $($content:tt)*)=> {
+        TableCell::from_styled_content(
+            $style, 
+            crate::cell_content!($($content)*)
+        );
+    }
 }
 
 /// A table cell represents a single grid rectangle within a table.
@@ -107,7 +115,7 @@ impl TableCell {
     ) -> TableCell {
         // Split the format string into style tokens
         let styles: Vec<&str> = 
-            format[1..format.len() - 1].split(" ").collect();
+            format.split(" ").collect();
         let mut style_ix = 0;
         let mut table_cell = TableCell::new();
 
@@ -251,7 +259,8 @@ mod tests {
 
         assert_eq!(tc.contents.len(), 2);
 
-        assert_eq!(format!("{:?}", tc.contents[0]), 
+        assert_eq!(
+            format!("{:?}", tc.contents[0]), 
             format!("{:?}", Content::new( 
                 "testing".to_string(),
                 ContentStyle::new(

@@ -17,6 +17,19 @@ v0.0.3 - Color codes supported across all elements.
 v0.0.5 - Format table data rows. Expand testing.
 v0.1.0 - Documentation cleanup pass. Get what is there clean and tidy.
 
+## Syntax
+
+### Tables
+
+The following describes the formats by which tables can be built:
+```
+table!(["One", "Two", "Three"], ["1", "2", "3"]);
+table!(
+    row!("{r}", "Food", "Count"),
+    "Fish", "3", "Pears", "4", "Pizza", "10"
+);
+```
+
 ## Examples
 
 The following code prints a two-column table from a vector of strings:

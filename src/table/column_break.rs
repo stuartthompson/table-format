@@ -10,20 +10,6 @@ pub enum ColumnBreak {
     Content,
 }
 
-#[allow(unused_macros)]
-macro_rules! brk {
-    ( c ) => {
-        ColumnBreak::Content
-    };
-
-    ( {$t:literal:$w:literal} ) => {
-        match $t {
-            'f' => ColumnBreak::Fixed($w),
-            'm' => ColumnBreak::Minimum($w)
-        }
-    }
-}
-
 impl FromStr for ColumnBreak {
     type Err = std::string::ParseError;
 
@@ -34,10 +20,18 @@ impl FromStr for ColumnBreak {
     /// * `format` - The format string describing the break.
     /// 
     fn from_str(format: &str) -> Result<Self, Self::Err> {
-        let t = &format[1..1];
-        let w = &format[3..3];
+        let content = format[1..format.len()-1].split(':').collect::<Vec<&str>>();
 
-        Ok(ColumnBreak::Fixed(15))
+        let t = content[0];
+        let w = usize::from_str(content[1]).unwrap();
+
+        match t {
+            "f" => Ok(ColumnBreak::Fixed(w)),
+            "m" => Ok(ColumnBreak::Minimum(w)),
+            "c" | _ => Ok(ColumnBreak::Content)
+        }
+
+        // Ok(ColumnBreak::Fixed(15))
     }
 }
 
@@ -45,4 +39,21 @@ impl FromStr for ColumnBreak {
 mod tests {
     use super::*;
 
+    #[test]
+    fn from_str_fixed() {
+        let cb = ColumnBreak::from_str("{f:15}").unwrap();
+        assert_eq!(
+            format!("{:?}", cb), 
+            format!("{:?}", ColumnBreak::Fixed(15))
+        );
+    }
+
+    #[test]
+    fn from_str_min_width() {
+        let cb = ColumnBreak::from_str("{m:15}").unwrap();
+        assert_eq!(
+            format!("{:?}", cb), 
+            format!("{:?}", ColumnBreak::Minimum(15))
+        );
+    }
 }

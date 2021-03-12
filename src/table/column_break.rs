@@ -1,5 +1,7 @@
+use std::str::FromStr;
+
 #[derive(Debug)]
-pub enum BreakWidth {
+pub enum ColumnBreak {
     // The column width is fixed
     Fixed(usize),
     // The column is always at least a minimum width
@@ -8,86 +10,39 @@ pub enum BreakWidth {
     Content,
 }
 
-/// Column breaks describe where content should be divided
-#[derive(Debug)]
-pub struct ColumnBreak {
-    pub width: BreakWidth
-}
-
-
-// breaks!(f5, m5, c)
-
 #[allow(unused_macros)]
-#[macro_export]
-macro_rules! b {
-    (F($w:expr)) => {
-        BreakWidth::Fixed($w)
+macro_rules! brk {
+    ( c ) => {
+        ColumnBreak::Content
     };
-    (M($w:expr)) => {
-        BreakWidth::Minimum($w)
-    };
-    (C) => {
-        BreakWidth::Content
+
+    ( {$t:literal:$w:literal} ) => {
+        match $t {
+            'f' => ColumnBreak::Fixed($w),
+            'm' => ColumnBreak::Minimum($w)
+        }
     }
 }
 
-#[allow(unused_macros)]
-#[macro_export]
-macro_rules! breaks {
-    ($( $b:expr ),*) => {{
-        let mut v = Vec::new();
-        $( v.push(ColumnBreak { width: $b }); )*
-        // $( println!("{:?}", $b); )*
-        v
-    }};
-} 
+impl FromStr for ColumnBreak {
+    type Err = std::string::ParseError;
 
-// #[allow(unused_macros)]
-// #[macro_export]
-// macro_rules! bks {
-//     ($(F($f:tt)),*, $(M($m:tt)),*, $(C),*) => {{
-//         let mut v = Vec::new();
-//         $( 
-//             v.push(ColumnBreak { width: BreakWidth::Fixed($f) }); 
-//             v.push(ColumnBreak { width: BreakWidth::Minimum($m) });
-//             v.push(ColumnBreak { width: BreakWidth::Content });
-//         )*
-//         v
-//     }};
-// }
+    /// Returns a column break from a string.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `format` - The format string describing the break.
+    /// 
+    fn from_str(format: &str) -> Result<Self, Self::Err> {
+        let t = &format[1..1];
+        let w = &format[3..3];
 
-    // ($( $style:expr => $content:expr ),*) => {
-    //     {
-    //         let mut tr = TableRow::new();
-    //         $( tr.add_cell(crate::cell!($style, $content)); )*;
-    //         tr
-    //     }
-    // };
-    // ($style:expr, $($content:expr ),*) => {
-    //     {
-    //         let mut tr = TableRow::new();
-    //         $( tr.add_cell(crate::cell!($style, $content)); )*
-    //         tr
-    //     }
-    // };
+        Ok(ColumnBreak::Fixed(15))
+    }
+}
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    #[test]
-    fn test_breaks_macro() {
-        let b = breaks!(b!(F(15)), b!(M(25)), b!(C), b!(F(18)));
-        assert_eq!(
-            format!("{:?}", b),
-            format!("{:?}", 
-                vec!(
-                    ColumnBreak { width: BreakWidth::Fixed(15)},
-                    ColumnBreak { width: BreakWidth::Minimum(25)},
-                    ColumnBreak { width: BreakWidth::Content},
-                    ColumnBreak { width: BreakWidth::Fixed(18)},
-                )    
-            )
-        );
-    }
 }

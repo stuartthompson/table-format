@@ -4,11 +4,10 @@ pub mod table_row;
 pub mod table_cell;
 
 use border::Border;
-use column_break::{ColumnBreak, BreakWidth};
+use column_break::{ColumnBreak};
 use table_cell::TableCell;
 use table_row::TableRow;
 use super::content::Content;
-use super::data_item::DataItem;
 use super::VecDataSource;
 
 #[allow(unused_macros)]
@@ -24,20 +23,6 @@ macro_rules! table {
         )
     }};
 }
-    // ($( $style:expr => $content:expr ),*) => {
-    //     {
-    //         let mut tr = TableRow::new();
-    //         $( tr.add_cell(crate::cell!($style, $content)); )*
-    //         tr
-    //     }
-    // };
-    // ($style:expr, $($content:expr),*) => {
-    //     {
-    //         let mut tr = TableRow::new();
-    //         $( tr.add_cell(crate::cell!($style, $content)); )*
-    //         tr
-    //     }
-    // };
 
 pub struct Table {
     border: Border,
@@ -242,7 +227,7 @@ impl Table {
 
         // Iterate through the header row
         let mut column_break_ix = 0;
-        let content_break = ColumnBreak { width: BreakWidth::Content };
+        let content_break = ColumnBreak::Content;
         for cell in self.column_headers.iter() {
             // Get the next column break (if one is available)
             let column_break: &ColumnBreak = 
@@ -279,7 +264,7 @@ mod tests {
     #[test]
     fn measure_header_one_column() {
         let breaks = vec!(
-            ColumnBreak { width: BreakWidth::Fixed(15) }
+            ColumnBreak::Fixed(15)
         );
 
         let col_headers = TableRow::from(
@@ -300,53 +285,4 @@ mod tests {
 
         assert_eq!(table.measure_width(), expected_width);
     }
-
-    // #[test]
-    // fn measure_header_two_columns() {
-    //     let breaks = vec!(
-    //         ColumnBreak { width: BreakWidth::Fixed(15) },
-    //         ColumnBreak { width: BreakWidth::Fixed(15) }
-    //     );
-
-    //     let col_headers = TableRow::from(
-    //         vec!(
-    //             TableCell::from_data_item(
-    //                 DataItem::from(
-    //                     vec!(
-    //                         Content::new(
-    //                             String::from("test"),
-    //                             Color::White,
-    //                             Alignment::Center,
-    //                             Wrap::NoWrap
-    //                         )
-    //                     )
-    //                 )
-    //             ),
-    //             TableCell::from_data_item(
-    //                 DataItem::from(
-    //                     vec!(
-    //                         Content::new(
-    //                             String::from("test"),
-    //                             Color::White,
-    //                             Alignment::Center,
-    //                             Wrap::NoWrap
-    //                         )
-    //                     )
-    //                 )
-    //             )
-    //         )
-    //     );
-
-    //     let mut table = Table::from(
-    //         breaks,
-    //         col_headers,
-    //         Vec::new(),
-    //         Vec::new()
-    //     );
-        
-    //     // Expect 33 chars. 2 x 15 columns + 2 for outer border, 1 for split
-    //     let expected_width = 33;
-
-    //     assert_eq!(table.measure_width(), expected_width);
-    // }
 }

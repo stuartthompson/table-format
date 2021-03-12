@@ -1,5 +1,5 @@
 use crate::content::{Content, ContentIterator, ContentStyle};
-use super::column_break::{ColumnBreak, BreakWidth};
+use super::column_break::ColumnBreak;
 use crate::data_item::DataItem;
 
 pub struct TableCellContentIterator<'a> {
@@ -213,17 +213,17 @@ impl TableCell {
         self: &TableCell,
         column_break: &ColumnBreak,
     ) -> usize {
-        match column_break.width {
-            BreakWidth::Fixed(fixed) => fixed,
-            BreakWidth::Minimum(minimum_width) => {
+        match column_break {
+            ColumnBreak::Fixed(fixed) => *fixed,
+            ColumnBreak::Minimum(minimum_width) => {
                 let content_width = self.measure_content_width();
-                if minimum_width > content_width {
-                    minimum_width
+                if minimum_width > &content_width {
+                    *minimum_width
                 } else {
                     content_width
                 }
             },
-            BreakWidth::Content => {
+            ColumnBreak::Content => {
                 self.measure_content_width()
             }
         }

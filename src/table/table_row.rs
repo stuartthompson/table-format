@@ -1,5 +1,5 @@
 use super::border::Border;
-use super::column_break::{ColumnBreak, BreakWidth};
+use super::column_break::ColumnBreak;
 use super::table_cell::TableCell;
 
 pub struct CellIterator<'a> {
@@ -101,7 +101,7 @@ impl TableRow {
         }
 
         // Iterate the number of lines
-        let content_break = ColumnBreak { width: BreakWidth::Content };
+        let content_break = ColumnBreak::Content;
         for _line_ix in 0..row_height {
             // Left border
             result.push_str(&border.format_left());
@@ -153,7 +153,7 @@ impl TableRow {
 
         // Iterate the row cells and measure based upon supplied column breaks
         let column_break_ix = 0;
-        let content_break = ColumnBreak { width: BreakWidth::Content };
+        let content_break = ColumnBreak::Content;
         for cell in &self.cells {
             // Get the next column break (if one is available)
             let column_break: &ColumnBreak = 

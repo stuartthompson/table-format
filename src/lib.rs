@@ -6,7 +6,7 @@ mod data_item;
 mod data_source;
 mod table_data_source;
 mod vec_data_source;
-mod table;
+pub mod table;
 
 use table::Table;
 use data_item::DataItem;

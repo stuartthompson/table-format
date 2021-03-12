@@ -10,28 +10,40 @@ pub enum ColumnBreak {
     Content,
 }
 
+#[derive(Debug)]
+pub enum ParseError {
+    InvalidFormat(String) 
+}
+
 impl FromStr for ColumnBreak {
-    type Err = std::string::ParseError;
+    type Err = ParseError;
 
     /// Returns a column break from a string.
     /// 
     /// # Arguments
     /// 
     /// * `format` - The format string describing the break.
-    /// 
-    fn from_str(format: &str) -> Result<Self, Self::Err> {
-        let content = format[1..format.len()-1].split(':').collect::<Vec<&str>>();
-
-        let t = content[0];
-        let w = usize::from_str(content[1]).unwrap();
-
-        match t {
-            "f" => Ok(ColumnBreak::Fixed(w)),
-            "m" => Ok(ColumnBreak::Minimum(w)),
-            "c" | _ => Ok(ColumnBreak::Content)
+   fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.trim().len() == 0 {
+            return Err(ParseError::InvalidFormat(
+                String::from("format cannot be empty")));
         }
 
-        // Ok(ColumnBreak::Fixed(15))
+        // Split contents of format string into type and params
+        let content = 
+            s[1..s.len()-1].split(':').collect::<Vec<&str>>();
+        
+        match content[0] {
+            "f" => {
+                let width = usize::from_str(content[1]).unwrap();
+                Ok(ColumnBreak::Fixed(width))
+            },
+            "m" => {
+                let width = usize::from_str(content[1]).unwrap();
+                Ok(ColumnBreak::Minimum(width))
+            },
+            "c" | _ => Ok(ColumnBreak::Content)
+        }
     }
 }
 
@@ -55,5 +67,21 @@ mod tests {
             format!("{:?}", cb), 
             format!("{:?}", ColumnBreak::Minimum(15))
         );
+    }
+
+    #[test]
+    fn from_str_content() {
+        let cb = ColumnBreak::from_str("{c}").unwrap();
+        assert_eq!(
+            format!("{:?}", cb),
+            format!("{:?}", ColumnBreak::Content)
+        );
+    }
+
+    /// Tests that 
+    #[test]
+    #[should_panic] 
+    fn from_str_invalid_empty() {
+        ColumnBreak::from_str("").unwrap();
     }
 }

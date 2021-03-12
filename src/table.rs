@@ -4,11 +4,10 @@ pub mod table_row;
 pub mod table_cell;
 
 use border::Border;
-use column_break::{ColumnBreak};
+pub use column_break::{ColumnBreak};
 use table_cell::TableCell;
 use table_row::TableRow;
-use super::content::Content;
-use super::VecDataSource;
+use crate::vec_data_source::VecDataSource;
 
 #[allow(unused_macros)]
 #[macro_export]

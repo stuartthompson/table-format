@@ -8,6 +8,7 @@ pub struct TableCellContentIterator<'a> {
     content: &'a Vec<Content>,
     current_content_iterator: ContentIterator,
     current_line_ix: usize,
+    base_style: ContentStyle,
     width: usize,
     target_height: usize,
     current_height: usize,
@@ -31,7 +32,7 @@ impl<'a> Iterator for TableCellContentIterator<'a> {
                         // If there are more lines, get iterator for next line
                         if self.current_line_ix < self.content.len() {
                             self.current_content_iterator = 
-                                self.content[self.current_line_ix].get_iterator(self.width);
+                                self.content[self.current_line_ix].get_iterator(self.base_style.clone(), self.width);
 
                             // Get the line from the iterator
                             self.current_content_iterator.next()
@@ -90,26 +91,26 @@ macro_rules! cell {
 /// Cells belong to a row.
 #[derive(Debug)]
 pub struct TableCell {
-    contents: Vec<Content>
+    contents: Vec<Content>,
+    base_style: ContentStyle,
 }
 
 impl TableCell {
-    pub fn new() -> TableCell {
+    pub fn empty() -> TableCell {
         TableCell {
-            contents: Vec::new()
+            contents: Vec::new(),
+            base_style: ContentStyle::default(),
         }
     }
 
-    pub fn from_contents(
-        contents: Vec<&str>,
+    pub fn new(
+        contents: Vec<Content>,
+        base_style: ContentStyle,
     ) -> TableCell {
-        let mut table_cell = TableCell::new();
-        for content in contents {
-            table_cell.contents.push(
-                Content::from_str(content).unwrap()
-            );
+        TableCell {
+            contents,
+            base_style
         }
-        table_cell
     }
 
     pub fn from_styled_content(
@@ -120,7 +121,7 @@ impl TableCell {
         let styles: Vec<&str> = 
             format.split(" ").collect();
         let mut style_ix = 0;
-        let mut table_cell = TableCell::new();
+        let mut table_cell = TableCell::empty();
 
         // Iterate the contents
         for content in contents {
@@ -132,7 +133,7 @@ impl TableCell {
             
             // Add the new styled content
             table_cell.contents.push(
-                Content::new(content.to_string(), style));
+                Content::new(content.to_string(), Some(style)));
 
             style_ix += 1;
         }
@@ -144,12 +145,15 @@ impl TableCell {
     /// # Arguments
     /// 
     /// * `data_item` - The data item from which to build the table cell.
+    /// * `base_style` - The base style to apply to the cell contents.
     pub fn from_data_item(
-        data_item: &DataItem
+        data_item: &DataItem,
+        base_style: ContentStyle,
     ) -> TableCell {
-        TableCell {
-            contents: data_item.lines.iter().map(|c| c.clone()).collect::<Vec<Content>>()
-        }
+        TableCell::new(
+            data_item.lines.iter().map(|c| c.clone()).collect::<Vec<Content>>(), 
+            base_style,
+        )
     }
 
     /// Returns the column break specified in the first content line of the 
@@ -161,7 +165,10 @@ impl TableCell {
         self: &TableCell
     ) -> ColumnBreak {
         if self.contents.len() > 0 {
-            self.contents[0].style.width.clone()
+            match &self.contents[0].style {
+                Some(style) => style.width.clone(), 
+                None => ColumnBreak::default()
+            }
         } else {
             ColumnBreak::default()
         }
@@ -182,8 +189,10 @@ impl TableCell {
 
         TableCellContentIterator {
             content: &self.contents,
-            current_content_iterator: self.contents[0].get_iterator(cell_width),
+            current_content_iterator: 
+                self.contents[0].get_iterator(self.base_style.clone(), cell_width),
             current_line_ix: 0,
+            base_style: self.base_style.clone(),
             width: cell_width,
             target_height: self.measure_height(column_break),
             current_height: 0
@@ -281,13 +290,13 @@ mod tests {
             format!("{:?}", tc.contents[0]), 
             format!("{:?}", Content::new( 
                 "testing".to_string(),
-                ContentStyle::new(
+                Some(ContentStyle::new(
                     Some(Color::Red),
                     None,
                     Alignment::Left,
                     Wrap::Wrap,
                     ColumnBreak::Content
-                )
+                ))
             ))
         );
     }

@@ -40,6 +40,14 @@ impl Wrap {
     }
 }
 
+#[allow(unused_macros)]
+#[macro_export]
+macro_rules! content_style {
+    ( $style:literal ) => {
+        ContentStyle::from_format($style)
+    }    
+}
+
 /// Represents the style to apply to a line of content.
 #[derive(Debug, Clone)]
 pub struct ContentStyle {

@@ -22,7 +22,7 @@ impl<T> Iterator for VecDataSource<T>
 
             let content = Content::new(
                 format!("{}", self.data[self.current_ix]),
-                ContentStyle::default(),
+                None,
             );
 
             let item = DataItem {

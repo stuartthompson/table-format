@@ -9,29 +9,36 @@ pub use column_break::{ColumnBreak};
 use super::data_item::DataItem;
 use table_cell::TableCell;
 use table_row::TableRow;
+use crate::content::ContentStyle;
 use crate::vec_data_source::VecDataSource;
-use crate::row;
+use crate::{row,content_style};
 
 #[allow(unused_macros)]
 #[macro_export]
 macro_rules! table {
+    // Simple format
     ( $($style:literal=>$header:literal),*; $($data:literal),* ) => {
+        table!(
+            $($style => $header),*;
+            "{}";
+            $($data),*
+        )
+    };
+
+    // Base cell style format
+    ( $($style:literal=>$header:literal),*;
+      $($cell_style:literal),*; 
+      $($data:literal),* ) => 
+    {
         Table::from_vec(
             // Header specification
-            row!($($style => $header),*),
+            row!($($style => $header), *),
+            // Base cell styles
+            vec!($(content_style!($cell_style)),*),
             // Data
             vec!($($data),*)
         )
-    };
-    // ($breaks:expr, $headers:expr, $($content:expr),*) => {{
-    //     let mut data = Vec::new();
-    //     $( data.push($content); )*
-    //     Table::from_vec(
-    //         $breaks,
-    //         $headers,
-    //         data
-    //     )
-    // }};
+    }
 }
 
 #[derive(Debug)]
@@ -85,9 +92,11 @@ impl Table {
     /// # Arguments
     /// 
     /// * `column_headers` - The header row describes how to split the data.
+    /// * `cell_styles` - The base styles to apply to each cell.
     /// * `data` - A vector containing the data for the table body.
     pub fn from_vec(
         column_headers: TableRow,
+        cell_styles: Vec<ContentStyle>,
         data: Vec<&str>
     ) -> Table {
         // Build data items from string vector source
@@ -97,6 +106,7 @@ impl Table {
 
         Table::from_data_source(
             column_headers,
+            cell_styles,
             Vec::new(),
             d.iter()
         )
@@ -107,10 +117,12 @@ impl Table {
     /// # Arguments
     /// 
     /// * `column_headers` - The header row describes how to split the data.
+    /// * `cell_styles` - The base styles to apply to each cell.
     /// * `row_headers` - The row headers to put before each row.
     /// * `data_source` - An iterable source providing the table body data.
     pub fn from_data_source<'a, I>(
         column_headers: TableRow,
+        cell_styles: Vec<ContentStyle>,
         row_headers: Vec<TableCell>,
         data_source: I,
     ) -> Table 
@@ -124,8 +136,6 @@ impl Table {
         for cell in column_headers.iter() {
             column_breaks.push(cell.get_break_from_content());
         }
-        
-        println!("Column Breaks: {:?}", column_breaks);
 
         // Create a new row
         let mut row_ix = 0;
@@ -141,8 +151,14 @@ impl Table {
                 row_ix += 1;
             }
 
+            // Get the cell style
+            let mut cell_style = &ContentStyle::default();
+            if cell_styles.len() > break_ix {
+                cell_style = &cell_styles[break_ix];
+            }
+
             data_rows[row_ix].add_cell(
-                TableCell::from_data_item(item)
+                TableCell::from_data_item(item, cell_style.clone())
             );
 
             break_ix += 1;
@@ -172,22 +188,6 @@ impl Table {
         result.push_str(&self.format_body());
 
         result
-    }
-
-    /// Returns a vector of column breaks from a format string.
-    ///
-    /// # Arguments
-    ///
-    /// * `breaks_format` - The column breaks format string to parse.
-    fn parse_column_breaks(
-        breaks_format: &str
-    ) -> Vec<ColumnBreak> {
-        let mut breaks = Vec::new();
-        for b in breaks_format.split(' ').collect::<Vec<&str>>() {
-            breaks.push(ColumnBreak::from_str(b).unwrap());
-        };
-
-        breaks
     }
 
     /// Formats the table's column headers.
@@ -314,8 +314,13 @@ mod tests {
     use crate::cell;
 
     /// Tests the simple format table! macro.
+    /// 
+    /// This macro takes column breaks and header content in the first row, 
+    /// terminated by a semicolon.
+    /// 
+    /// The second row is a vector of strings that are used for the table body.
     #[test]
-    fn table_macro_simple() {
+    fn table_macro_simple_unstyled_body() {
         let table = table!(
             "{B^:12:}" => "Food", "{G^:7:}" => "Count";
             "Fish", "15", "Pizza", "10", "Tomato", "24"
@@ -324,6 +329,24 @@ mod tests {
         println!("{}", table.format());
 
         let expected = "+--------------------+\n|\u{1b}[94m    Food    \u{1b}[0m|\u{1b}[92m Count \u{1b}[0m|\n+--------------------+\n|Fish        |15     |\n+--------------------+\n|Pizza       |10     |\n+--------------------+\n|Tomato      |24     |\n+--------------------+\n";
+
+        assert_eq!(
+            table.format(),
+            expected
+        );
+    }
+
+    #[test]
+    fn table_macro_simple_styled_body() {
+        let table = table!(
+            "{m>:10:}" => "Item", "{m>:10:}" => "Price";
+            "{c^}", "{g<}";
+            "Basic", "$5,000", "Super", "$12,000", "Ultimate", "$35,000"
+        );
+
+        println!("{}", table.format());
+
+        let expected = "+---------------------+\n|\u{1b}[35m      Item\u{1b}[0m|\u{1b}[35m     Price\u{1b}[0m|\n+---------------------+\n|\u{1b}[36m  Basic   \u{1b}[0m|\u{1b}[32m$5,000    \u{1b}[0m|\n+---------------------+\n|\u{1b}[36m  Super   \u{1b}[0m|\u{1b}[32m$12,000   \u{1b}[0m|\n+---------------------+\n|\u{1b}[36m Ultimate \u{1b}[0m|\u{1b}[32m$35,000   \u{1b}[0m|\n+---------------------+\n";
 
         assert_eq!(
             table.format(),

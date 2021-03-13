@@ -31,14 +31,14 @@ impl Iterator for ContentIterator {
 #[derive(Debug, Clone)]
 pub struct Content {
     content: String,
-    pub style: ContentStyle,
+    pub style: Option<ContentStyle>,
 }
 
 impl std::str::FromStr for Content {
     type Err = std::fmt::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Content { content: s.to_string(), style: ContentStyle::default() })
+        Ok(Content { content: s.to_string(), style: None })
     } 
 }
 
@@ -48,12 +48,10 @@ impl Content {
     /// # Arguments
     /// 
     /// * `content` - The string content.
-    /// * `color` - The content color.
-    /// * `alignment` - The content aligment.
-    /// * `wrap` - The content wrapping method.
+    /// * `style` - The content style.
     pub fn new(
         content: String,
-        style: ContentStyle,
+        style: Option<ContentStyle>,
     ) -> Content {
         Content {
             content,
@@ -66,16 +64,24 @@ impl Content {
     /// # Arguments
     /// 
     /// * `self` - The content to iterate.
+    /// * `base_style` - The base style to use if no content style is defined.
     /// * `width` - The width at which to wrap or truncate.
     pub fn get_iterator(
         self: &Content,
+        base_style: ContentStyle,
         width: usize
     ) -> ContentIterator {
         let content_len = self.content.len();
 
         let mut result: Vec<String> = Vec::new();
 
-        match self.style.wrap {
+        // Use base style if needed
+        let style = match &self.style {
+            Some(style) => style,
+            None => &base_style
+        };
+            
+        match style.wrap {
             // Truncate on single line
             Wrap::Truncate => {
                 // Pad or truncate
@@ -83,7 +89,7 @@ impl Content {
                     result.push(
                         Content::format(
                             &self.content,
-                            &self.style, 
+                            &style, 
                             width
                         )
                     );
@@ -91,7 +97,7 @@ impl Content {
                     result.push(
                         Content::format(
                             &self.content[0..(width - 3)],
-                            &self.style,
+                            &style,
                             width
                         )
                     );
@@ -112,7 +118,7 @@ impl Content {
                     result.push(
                         Content::format(
                             &self.content[from..to], 
-                            &self.style, 
+                            &style, 
                             width)
                     );
                 }
@@ -244,9 +250,14 @@ impl Content {
     pub fn will_wrap(
         self: &Content
     ) -> bool {
-        match self.style.wrap {
-            Wrap::Wrap => true,
-            Wrap::Truncate => false
+        match &self.style {
+            Some(style) => {
+                match style.wrap {
+                    Wrap::Wrap => true,
+                    Wrap::Truncate => false
+                }
+            },
+            None => false
         }
     }
 }

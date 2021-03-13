@@ -15,7 +15,7 @@ pub enum ColumnBreak {
 macro_rules! breaks {
     ( $($break:expr),* ) => {{
         let mut breaks = Vec::new();
-        $(breaks.push(ColumnBreak::from_str($break).unwrap());)*
+        $(breaks.push(ColumnBreak::from_string($break));)*
         breaks
     }}
 }
@@ -53,6 +53,12 @@ impl FromStr for ColumnBreak {
             },
             "c" | _ => Ok(ColumnBreak::Content)
         }
+    }
+}
+
+impl ColumnBreak {
+    pub fn from_string(s: &str) -> ColumnBreak {
+        ColumnBreak::from_str(s).unwrap()
     }
 }
 

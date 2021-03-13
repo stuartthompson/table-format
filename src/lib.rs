@@ -1,6 +1,3 @@
-#![recursion_limit="256"]
-
-
 mod content;
 mod data_item;
 mod data_source;
@@ -8,11 +5,7 @@ mod table_data_source;
 mod vec_data_source;
 pub mod table;
 
-use std::str::FromStr;
 use table::Table;
-use data_item::DataItem;
-// use data_source::WSDataFrame;
-use vec_data_source::VecDataSource;
 
 #[cfg(test)]
 mod tests {

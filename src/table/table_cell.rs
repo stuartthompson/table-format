@@ -270,7 +270,8 @@ mod tests {
                     Some(Color::Red),
                     None,
                     Alignment::Left,
-                    Wrap::Wrap
+                    Wrap::Wrap,
+                    ColumnBreak::Content
                 )
             ))
         );

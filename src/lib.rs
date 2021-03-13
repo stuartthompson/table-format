@@ -18,7 +18,7 @@ mod tests {
     fn test_simple_vector_table() {
         let table = table!(
             breaks!("f:15", "f:10"),
-            row!("{c^}", "Food", "Count"), 
+            row!("{c^}" => "Food", "{c^}" => "Count"), 
             "Fish", "3", "Pears", "5", "Pizza", "13"
         );
 

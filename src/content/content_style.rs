@@ -1,4 +1,5 @@
 use colored::{Color, Colorize};
+use super::super::table::column_break::ColumnBreak;
 
 /// Describes how content should be aligned.
 #[derive(Debug, Clone)]
@@ -46,6 +47,7 @@ pub struct ContentStyle {
     pub bg_color: Option<Color>,
     pub alignment: Alignment,
     pub wrap: Wrap,
+    pub width: ColumnBreak
 }
 
 impl ContentStyle {
@@ -54,7 +56,8 @@ impl ContentStyle {
             fg_color: None,
             bg_color: None,
             alignment: Alignment::Left,
-            wrap: Wrap::Truncate
+            wrap: Wrap::Truncate,
+            width: ColumnBreak::Content,
         }
     }
 
@@ -62,13 +65,15 @@ impl ContentStyle {
         fg_color: Option<Color>,
         bg_color: Option<Color>,
         alignment: Alignment,
-        wrap: Wrap
+        wrap: Wrap,
+        width: ColumnBreak
     ) -> ContentStyle {
         ContentStyle {
             fg_color,
             bg_color,
             alignment,
             wrap,
+            width,
         }
     }
 
@@ -109,6 +114,32 @@ impl ContentStyle {
                 }
             }
             token_ix += 1;
+
+            // Width specifier (consumes until matching token)
+            if token == ':' {
+                // TODO: Clean up this logic (should be a common width fn)
+                match format[token_ix+1..tokens.len()+1].find(':') {
+                    Some(ix) => {
+                        let width = format[token_ix+1..token_ix+ix+1].parse::<usize>().unwrap();
+                        style.width = ColumnBreak::Fixed(width);
+                        token_ix += ix + 1;
+                    }
+                    None => { /* Ignore (no matching token) */ }
+                }
+            }
+
+            // Width specifier (consumes until matching token)
+            if token == '-' {
+                // TODO: Clean up this logic (should be a common width fn)
+                match format[token_ix+1..tokens.len()+1].find('-') {
+                    Some(ix) => {
+                        let width = format[token_ix+1..token_ix+ix+1].parse::<usize>().unwrap();
+                        style.width = ColumnBreak::Fixed(width);
+                        token_ix += ix + 1;
+                    }
+                    None => { /* Ignore (no matching token) */ }
+                }
+            }
         }
 
         style
@@ -141,10 +172,26 @@ impl ContentStyle {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+    use colored::Color;
 
    #[test]
    fn test_from_format() {
-       
-   }
+        let style = ContentStyle::from_format("{c^;:15:}");
+   
+        let expected = 
+            ContentStyle {
+                fg_color: Some(Color::Cyan),
+                bg_color: None,
+                alignment: Alignment::Center,
+                wrap: Wrap::Wrap,
+                width: ColumnBreak::Fixed(15)
+            };
+
+        assert_eq!(
+            format!("{:?}", style),
+            format!("{:?}", expected)
+        );
+    }
 
 }

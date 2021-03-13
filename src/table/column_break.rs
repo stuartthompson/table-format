@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ColumnBreak {
     // The column width is fixed
     Fixed(usize),

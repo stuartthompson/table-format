@@ -75,28 +75,21 @@ impl Table {
         column_headers: TableRow,
         data: Vec<&str>
     ) -> Table {
-        // Build data items from string vector source
-        let d: Vec<DataItem> = 
-            data.iter().map(|i| DataItem::from_str(i).unwrap())
-                .collect::<Vec<DataItem>>();
-
         Table::from_data_source(
             Table::parse_column_breaks(breaks),
             column_headers,
             Vec::new(),
-            d.iter()
+            &data.iter().map(|i| DataItem::from_str(i).unwrap())
+                .collect::<Vec<DataItem>>().into_iter()
         )
     }
 
-    pub fn from_data_source<'a, I>(
+    pub fn from_data_source(
         column_breaks: Vec<ColumnBreak>,
         column_headers: TableRow,
         row_headers: Vec<TableCell>,
-        data_source: I,
-    ) -> Table 
-        where 
-            I: Iterator<Item=&'a DataItem>
-    {
+        data_source: &dyn Iterator<Item=DataItem>,
+    ) -> Table {
 
         let mut data_rows = Vec::new();
         
@@ -106,7 +99,7 @@ impl Table {
 
         let mut break_ix = 0;
 
-        for item in data_source {
+        for item in data_source.iter() {
             // Add a new row if needed
             if break_ix == column_breaks.len() {
                 break_ix = 0;

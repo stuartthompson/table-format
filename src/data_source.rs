@@ -1,3 +1,7 @@
+pub trait DataSource {
+}
+
+
 // use super::data_item::DataItem;
 
 // /// Pretend data source for testing multi-line scenarios.

@@ -28,10 +28,18 @@ impl Iterator for ContentIterator {
 }
 
 /// Represents a line of content.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Content {
     content: String,
     style: ContentStyle,
+}
+
+impl std::str::FromStr for Content {
+    type Err = std::fmt::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Content { content: s.to_string(), style: ContentStyle::default() })
+    } 
 }
 
 impl Content {
@@ -52,15 +60,6 @@ impl Content {
             style
         }
     } 
-
-    pub fn from_string(
-        content: String
-    ) -> Content {
-        Content {
-            content,
-            style: ContentStyle::default(),
-        }
-    }
 
     /// Returns an iterator for the line parts of a content.
     /// 

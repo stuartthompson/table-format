@@ -1,7 +1,7 @@
 use colored::{Color, Colorize};
 
 /// Describes how content should be aligned.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[derive(PartialEq)]
 pub enum Alignment {
     Left,
@@ -21,7 +21,7 @@ impl Alignment {
 }
 
 /// Describes whether content will wrap or truncate.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Wrap {
     /// Content will be truncated when over-width
     Truncate,
@@ -40,7 +40,7 @@ impl Wrap {
 }
 
 /// Represents the style to apply to a line of content.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ContentStyle {
     pub fg_color: Option<Color>,
     pub bg_color: Option<Color>,

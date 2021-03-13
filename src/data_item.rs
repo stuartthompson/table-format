@@ -1,7 +1,16 @@
+use std::str::FromStr;
 use super::content::Content;
 
 pub struct DataItem {
     pub lines: Vec<Content>
+}
+
+impl std::str::FromStr for DataItem {
+    type Err=std::fmt::Error;
+    
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(DataItem { lines: vec!(Content::from_str(s).unwrap()) })
+    }
 }
 
 impl DataItem {

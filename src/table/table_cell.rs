@@ -1,6 +1,8 @@
 use crate::content::{Content, ContentIterator, ContentStyle};
 use super::column_break::ColumnBreak;
 use crate::data_item::DataItem;
+use std::clone::Clone;
+use std::str::FromStr;
 
 pub struct TableCellContentIterator<'a> {
     content: &'a Vec<Content>,
@@ -99,12 +101,12 @@ impl TableCell {
     }
 
     pub fn from_contents(
-        contents: Vec<String>,
+        contents: Vec<&str>,
     ) -> TableCell {
         let mut table_cell = TableCell::new();
         for content in contents {
             table_cell.contents.push(
-                Content::new(content, ContentStyle::default())
+                Content::from_str(content).unwrap()
             );
         }
         table_cell
@@ -143,10 +145,10 @@ impl TableCell {
     /// 
     /// * `data_item` - The data item from which to build the table cell.
     pub fn from_data_item(
-        data_item: DataItem
+        data_item: &DataItem
     ) -> TableCell {
         TableCell {
-            contents: data_item.lines
+            contents: data_item.lines.iter().map(|c| c.clone()).collect::<Vec<Content>>()
         }
     }
 

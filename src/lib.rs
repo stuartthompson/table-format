@@ -8,6 +8,7 @@ mod table_data_source;
 mod vec_data_source;
 pub mod table;
 
+use std::str::FromStr;
 use table::Table;
 use data_item::DataItem;
 // use data_source::WSDataFrame;
@@ -22,20 +23,20 @@ mod tests {
 
     #[test]
     fn test_simple_vector_table() {
-        // let table = table!(
-        //     breaks!(b!(F(15)), b!(F(10))), 
-        //     row!("{c^}", "Food", "Count"), 
-        //     "Fish", "3", "Pears", "5", "Pizza", "13"
-        // );
+        let table = table!(
+            breaks!("f:15", "f:10"),
+            row!("{c^}", "Food", "Count"), 
+            "Fish", "3", "Pears", "5", "Pizza", "13"
+        );
 
-        // let output = table.format();
+        let output = table.format();
 
-        // //let expected = String::from("+--------------------------+\n|     Food      |  Count   |\n+--------------------------+\n|FishFishFishFis|3         |\n|hFishFish      |          |\n+--------------------------+\n|Apples         |5         |\n+--------------------------+\n|Pizza          |13        |\n+--------------------------+\n");
+        let expected = String::from("+--------------------------+\n|\u{1b}[36m     Food      \u{1b}[0m|\u{1b}[36m  Count   \u{1b}[0m|\n+--------------------------+\n|Fish           |3         |\n+--------------------------+\n|Pears          |5         |\n+--------------------------+\n|Pizza          |13        |\n+--------------------------+\n");
 
-        // println!("1-------10--------20--------30--------40--------50--------60--------70--------80");
-        // println!("''''5''''|''''5''''|''''5''''|''''5''''|''''5''''|''''5''''|''''5''''|''''5''''|");
-        // println!("{}", output);
+        println!("1-------10--------20--------30--------40--------50--------60--------70--------80");
+        println!("''''5''''|''''5''''|''''5''''|''''5''''|''''5''''|''''5''''|''''5''''|''''5''''|");
+        println!("{}", output);
 
-        //assert_eq!(expected, output);
+        assert_eq!(expected, output);
     }
 }

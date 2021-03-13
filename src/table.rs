@@ -17,7 +17,7 @@ macro_rules! table {
     ($breaks:expr, $headers:expr, $($content:expr),*) => {{
         let mut data = Vec::new();
         $( data.push($content); )*
-        Table::from_vec_with_headers(
+        Table::from_vec(
             $breaks,
             $headers,
             data
@@ -71,7 +71,7 @@ impl Table {
     }
 
     pub fn from_vec(
-        breaks: &str,
+        column_breaks: Vec<ColumnBreak>,
         column_headers: TableRow,
         data: Vec<&str>
     ) -> Table {
@@ -81,7 +81,7 @@ impl Table {
                 .collect::<Vec<DataItem>>();
 
         Table::from_data_source(
-            Table::parse_column_breaks(breaks),
+            column_breaks,
             column_headers,
             Vec::new(),
             d.iter()
@@ -97,7 +97,6 @@ impl Table {
         where 
             I: Iterator<Item=&'a DataItem>
     {
-
         let mut data_rows = Vec::new();
         
         // Create a new row

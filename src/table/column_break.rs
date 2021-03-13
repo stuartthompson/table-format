@@ -10,6 +10,16 @@ pub enum ColumnBreak {
     Content,
 }
 
+#[allow(unused_macros)]
+#[macro_export]
+macro_rules! breaks {
+    ( $($break:expr),* ) => {{
+        let mut breaks = Vec::new();
+        $(breaks.push(ColumnBreak::from_str($break).unwrap());)*
+        breaks
+    }}
+}
+
 #[derive(Debug)]
 pub enum ParseError {
     InvalidFormat(String) 
@@ -30,8 +40,7 @@ impl FromStr for ColumnBreak {
         }
 
         // Split contents of format string into type and params
-        let content = 
-            s[1..s.len()-1].split(':').collect::<Vec<&str>>();
+        let content = s.split(':').collect::<Vec<&str>>();
         
         match content[0] {
             "f" => {
@@ -53,7 +62,7 @@ mod tests {
 
     #[test]
     fn from_str_fixed() {
-        let cb = ColumnBreak::from_str("{f:15}").unwrap();
+        let cb = ColumnBreak::from_str("f:15").unwrap();
         assert_eq!(
             format!("{:?}", cb), 
             format!("{:?}", ColumnBreak::Fixed(15))
@@ -62,7 +71,7 @@ mod tests {
 
     #[test]
     fn from_str_min_width() {
-        let cb = ColumnBreak::from_str("{m:15}").unwrap();
+        let cb = ColumnBreak::from_str("m:15").unwrap();
         assert_eq!(
             format!("{:?}", cb), 
             format!("{:?}", ColumnBreak::Minimum(15))
@@ -71,7 +80,7 @@ mod tests {
 
     #[test]
     fn from_str_content() {
-        let cb = ColumnBreak::from_str("{c}").unwrap();
+        let cb = ColumnBreak::from_str("c").unwrap();
         assert_eq!(
             format!("{:?}", cb),
             format!("{:?}", ColumnBreak::Content)
@@ -83,5 +92,20 @@ mod tests {
     #[should_panic] 
     fn from_str_invalid_empty() {
         ColumnBreak::from_str("").unwrap();
+    }
+
+    #[test]
+    fn from_breaks_macro() {
+        let breaks = breaks!("f:15", "f:10");
+
+        let expected = vec!(
+            ColumnBreak::Fixed(15), 
+            ColumnBreak::Fixed(10)
+        );
+
+        assert_eq!(
+            format!("{:?}", breaks),
+            format!("{:?}", expected)
+        );
     }
 }

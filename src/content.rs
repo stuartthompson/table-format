@@ -31,7 +31,7 @@ impl Iterator for ContentIterator {
 #[derive(Debug, Clone)]
 pub struct Content {
     content: String,
-    style: ContentStyle,
+    pub style: ContentStyle,
 }
 
 impl std::str::FromStr for Content {

@@ -1,5 +1,6 @@
 use colored::Color;
 
+#[derive(Debug)]
 pub struct Border {
     top_left: char,
     top: char,

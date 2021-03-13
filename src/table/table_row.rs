@@ -101,7 +101,7 @@ impl TableRow {
         }
 
         // Iterate the number of lines
-        let content_break = ColumnBreak::Content;
+        let content_break = ColumnBreak::default();
         for _line_ix in 0..row_height {
             // Left border
             result.push_str(&border.format_left());

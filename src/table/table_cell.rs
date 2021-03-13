@@ -152,6 +152,21 @@ impl TableCell {
         }
     }
 
+    /// Returns the column break specified in the first content line of the 
+    /// cell.
+    /// 
+    /// This is used to determine the column break for cells used in the table 
+    /// header row.
+    pub fn get_break_from_content(
+        self: &TableCell
+    ) -> ColumnBreak {
+        if self.contents.len() > 0 {
+            self.contents[0].style.width.clone()
+        } else {
+            ColumnBreak::default()
+        }
+    }
+
     /// Returns the next formatted line of content from this table cell.
     /// 
     /// # Arguments

@@ -10,21 +10,31 @@ use super::data_item::DataItem;
 use table_cell::TableCell;
 use table_row::TableRow;
 use crate::vec_data_source::VecDataSource;
+use crate::row;
 
 #[allow(unused_macros)]
 #[macro_export]
 macro_rules! table {
-    ($breaks:expr, $headers:expr, $($content:expr),*) => {{
-        let mut data = Vec::new();
-        $( data.push($content); )*
+    ( $($style:literal=>$header:literal),*; $($data:literal),* ) => {
         Table::from_vec(
-            $breaks,
-            $headers,
-            data
+            // Header specification
+            row!($($style => $header),*),
+            // Data
+            vec!($($data),*)
         )
-    }};
+    };
+    // ($breaks:expr, $headers:expr, $($content:expr),*) => {{
+    //     let mut data = Vec::new();
+    //     $( data.push($content); )*
+    //     Table::from_vec(
+    //         $breaks,
+    //         $headers,
+    //         data
+    //     )
+    // }};
 }
 
+#[derive(Debug)]
 pub struct Table {
     border: Border,
     column_breaks: Vec<ColumnBreak>,
@@ -35,7 +45,7 @@ pub struct Table {
 
 impl Table {
     // Returns an empty table
-    pub fn new() -> Table {
+    pub fn empty() -> Table {
         Table {
             border: Border::default(),
             column_breaks: Vec::new(),
@@ -45,24 +55,24 @@ impl Table {
         }
     }
 
-    /// Builds a table from a data source and formats using a set of 
-    ///  supplied columns.
+    /// Returns a table from the supplied parameters.
     /// 
-    /// The columns define vertical breaks used determine when to wrap or 
-    ///  truncate content.
-    ///
     /// # Arguments
-    ///
-    /// * `source` - The data source to build the table from.
-    /// * `columns` - Columns describing how the data is structured.
-    pub fn from(
+    /// 
+    /// * `border` - Describes the table border.
+    /// * `column_breaks` - Column breaks describe header row widths.
+    /// * `column_headers` - The content for the column headers.
+    /// * `row_headers` - The content for the row headers.
+    /// * `data_rows` - The rows in the table body.
+    pub fn new(
+        border: Border,
         column_breaks: Vec<ColumnBreak>,
         column_headers: TableRow,
         row_headers: Vec<TableCell>,
         data_rows: Vec<TableRow>,
     ) -> Table {
         Table {
-            border: Border::default(),
+            border,
             column_breaks,
             column_headers,
             row_headers,
@@ -70,8 +80,13 @@ impl Table {
         }
     }
 
+    /// Returns a table built from a string vector data source.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `column_headers` - The header row describes how to split the data.
+    /// * `data` - A vector containing the data for the table body.
     pub fn from_vec(
-        column_breaks: Vec<ColumnBreak>,
         column_headers: TableRow,
         data: Vec<&str>
     ) -> Table {
@@ -81,15 +96,20 @@ impl Table {
                 .collect::<Vec<DataItem>>();
 
         Table::from_data_source(
-            column_breaks,
             column_headers,
             Vec::new(),
             d.iter()
         )
     }
 
+    /// Returns a table built from a data source.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `column_headers` - The header row describes how to split the data.
+    /// * `row_headers` - The row headers to put before each row.
+    /// * `data_source` - An iterable source providing the table body data.
     pub fn from_data_source<'a, I>(
-        column_breaks: Vec<ColumnBreak>,
         column_headers: TableRow,
         row_headers: Vec<TableCell>,
         data_source: I,
@@ -99,6 +119,14 @@ impl Table {
     {
         let mut data_rows = Vec::new();
         
+        // Derive column breaks from column headers
+        let mut column_breaks: Vec<ColumnBreak> = Vec::new();
+        for cell in column_headers.iter() {
+            column_breaks.push(cell.get_break_from_content());
+        }
+        
+        println!("Column Breaks: {:?}", column_breaks);
+
         // Create a new row
         let mut row_ix = 0;
         data_rows.push(TableRow::new());
@@ -120,13 +148,13 @@ impl Table {
             break_ix += 1;
         }
 
-        Table {
-            border: Border::default(),
+        Table::new(
+            Border::default(),
             column_breaks,
             column_headers,
             row_headers,
             data_rows
-        }
+        )
     }
 
     /// Returns the contents of a table formatted as a string.
@@ -285,28 +313,21 @@ mod tests {
     use crate::data_item::DataItem;
     use crate::cell;
 
+    /// Tests the simple format table! macro.
     #[test]
-    fn measure_header_one_column() {
-        let breaks = vec!(
-            ColumnBreak::Fixed(15)
+    fn table_macro_simple() {
+        let table = table!(
+            "{B^:12:}" => "Food", "{G^:7:}" => "Count";
+            "Fish", "15", "Pizza", "10", "Tomato", "24"
         );
 
-        let col_headers = TableRow::from(
-            vec!(
-                cell!("{r^} {G-r<}", "test", "hello")
-            )
+        println!("{}", table.format());
+
+        let expected = "+--------------------+\n|\u{1b}[94m    Food    \u{1b}[0m|\u{1b}[92m Count \u{1b}[0m|\n+--------------------+\n|Fish        |15     |\n+--------------------+\n|Pizza       |10     |\n+--------------------+\n|Tomato      |24     |\n+--------------------+\n";
+
+        assert_eq!(
+            table.format(),
+            expected
         );
-
-        let mut table = Table::from(
-            breaks,
-            col_headers,
-            Vec::new(),
-            Vec::new()
-        );
-
-        // Expect 15 chars for column, 2 for outer border chars
-        let expected_width = 17;
-
-        assert_eq!(table.measure_width(), expected_width);
     }
 }

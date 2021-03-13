@@ -57,6 +57,10 @@ impl FromStr for ColumnBreak {
 }
 
 impl ColumnBreak {
+    pub fn default() -> ColumnBreak {
+        ColumnBreak::Content
+    }
+
     pub fn from_string(s: &str) -> ColumnBreak {
         ColumnBreak::from_str(s).unwrap()
     }

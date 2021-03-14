@@ -11,7 +11,6 @@ pub use content::ContentStyle;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use table::column_break::ColumnBreak;
     use table::table_row::TableRow;
     use table::table_cell::TableCell;
 

@@ -2,7 +2,7 @@ mod content_style;
 
 use std::fmt::Display;
 use colored::{Color, Colorize};
-pub use content_style::{ContentStyle, Alignment, Wrap};
+pub use content_style::{ContentStyle, Alignment, Wrap, CellWidth};
 
 pub struct ContentIterator {
     parts: Vec<String>,

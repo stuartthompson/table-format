@@ -1,5 +1,21 @@
+use std::str::FromStr;
 use colored::{Color, Colorize};
-use super::super::table::column_break::ColumnBreak;
+
+#[derive(Debug, Clone)]
+pub enum CellWidth {
+    // The cell width is fixed
+    Fixed(usize),
+    // The cell is always at least a minimum width
+    Minimum(usize),
+    // The cell takes on the width of its content
+    Content,
+}
+
+impl CellWidth {
+    pub fn default() -> CellWidth {
+        CellWidth::Content
+    }
+}
 
 /// Describes how content should be aligned.
 #[derive(Debug, Clone)]
@@ -40,6 +56,11 @@ impl Wrap {
     }
 }
 
+
+
+
+
+
 #[allow(unused_macros)]
 #[macro_export]
 macro_rules! content_style {
@@ -55,7 +76,7 @@ pub struct ContentStyle {
     pub bg_color: Option<Color>,
     pub alignment: Alignment,
     pub wrap: Wrap,
-    pub width: ColumnBreak
+    pub width: CellWidth
 }
 
 impl ContentStyle {
@@ -65,7 +86,7 @@ impl ContentStyle {
             bg_color: None,
             alignment: Alignment::Left,
             wrap: Wrap::Truncate,
-            width: ColumnBreak::Content,
+            width: CellWidth::Content,
         }
     }
 
@@ -74,7 +95,7 @@ impl ContentStyle {
         bg_color: Option<Color>,
         alignment: Alignment,
         wrap: Wrap,
-        width: ColumnBreak
+        width: CellWidth
     ) -> ContentStyle {
         ContentStyle {
             fg_color,
@@ -129,7 +150,7 @@ impl ContentStyle {
                 match format[token_ix+1..tokens.len()+1].find(':') {
                     Some(ix) => {
                         let width = format[token_ix+1..token_ix+ix+1].parse::<usize>().unwrap();
-                        style.width = ColumnBreak::Fixed(width);
+                        style.width = CellWidth::Fixed(width);
                         token_ix += ix + 1;
                     }
                     None => { /* Ignore (no matching token) */ }
@@ -137,12 +158,12 @@ impl ContentStyle {
             }
 
             // Width specifier (consumes until matching token)
-            if token == '-' {
+            if token == '|' {
                 // TODO: Clean up this logic (should be a common width fn)
-                match format[token_ix+1..tokens.len()+1].find('-') {
+                match format[token_ix+1..tokens.len()+1].find('|') {
                     Some(ix) => {
                         let width = format[token_ix+1..token_ix+ix+1].parse::<usize>().unwrap();
-                        style.width = ColumnBreak::Fixed(width);
+                        style.width = CellWidth::Minimum(width);
                         token_ix += ix + 1;
                     }
                     None => { /* Ignore (no matching token) */ }
@@ -152,6 +173,32 @@ impl ContentStyle {
 
         style
     }
+
+    // fn parse_cell_width(
+    //     tt: Vec<char>,
+    //     t_ix: &mut usize
+    // ) -> Option<CellWidth> {
+    //     match tt[*t_ix] {
+    //         ':' | '|' => {
+
+    //         }
+    //         _ => None
+    //     }
+
+
+    //     if let Some(n) = s.find(token) {
+    //         let width = s[1..n].parse::<usize>().unwrap();
+    //     } else {
+    //         Result<None, 0>
+    //     }
+    //     match  {
+    //         Some(ix) => { 
+    //             style.width = CellWidth::Fixed(width);
+    //             token_ix += ix + 1;
+    //         }
+    //         None => { /* Ignore (no matching token) */ }
+    //     }
+    // }
 
     fn color_from_token(
         token: char
@@ -184,7 +231,7 @@ mod tests {
     use colored::Color;
 
    #[test]
-   fn test_from_format() {
+   fn from_format_fixed_width() {
         let style = ContentStyle::from_format("{c^;:15:}");
    
         let expected = 
@@ -193,7 +240,7 @@ mod tests {
                 bg_color: None,
                 alignment: Alignment::Center,
                 wrap: Wrap::Wrap,
-                width: ColumnBreak::Fixed(15)
+                width: CellWidth::Fixed(15)
             };
 
         assert_eq!(

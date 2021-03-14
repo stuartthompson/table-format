@@ -1,15 +1,13 @@
 mod border;
-pub mod column_break;
 pub mod table_row;
 pub mod table_cell;
 
 use std::str::FromStr;
 use border::Border;
-pub use column_break::{ColumnBreak};
 use super::data_item::DataItem;
 use table_cell::TableCell;
 use table_row::TableRow;
-use crate::content::ContentStyle;
+use crate::content::{ContentStyle, CellWidth};
 use crate::vec_data_source::VecDataSource;
 use crate::{row,content_style};
 
@@ -44,7 +42,7 @@ macro_rules! table {
 #[derive(Debug)]
 pub struct Table {
     border: Border,
-    column_breaks: Vec<ColumnBreak>,
+    column_breaks: Vec<CellWidth>,
     column_headers: TableRow,
     row_headers: Vec<TableCell>,
     data_rows: Vec<TableRow>
@@ -73,7 +71,7 @@ impl Table {
     /// * `data_rows` - The rows in the table body.
     pub fn new(
         border: Border,
-        column_breaks: Vec<ColumnBreak>,
+        column_breaks: Vec<CellWidth>,
         column_headers: TableRow,
         row_headers: Vec<TableCell>,
         data_rows: Vec<TableRow>,
@@ -132,9 +130,9 @@ impl Table {
         let mut data_rows = Vec::new();
         
         // Derive column breaks from column headers
-        let mut column_breaks: Vec<ColumnBreak> = Vec::new();
+        let mut column_breaks: Vec<CellWidth> = Vec::new();
         for cell in column_headers.iter() {
-            column_breaks.push(cell.get_break_from_content());
+            column_breaks.push(cell.get_cell_width());
         }
 
         // Create a new row
@@ -279,10 +277,10 @@ impl Table {
 
         // Iterate through the header row
         let mut column_break_ix = 0;
-        let content_break = ColumnBreak::Content;
+        let content_break = CellWidth::Content;
         for cell in self.column_headers.iter() {
             // Get the next column break (if one is available)
-            let column_break: &ColumnBreak = 
+            let column_break: &CellWidth = 
                 if column_break_ix < self.column_breaks.len() {
                     &self.column_breaks[column_break_ix]
                 } else {

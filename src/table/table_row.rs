@@ -1,6 +1,6 @@
 use super::border::Border;
-use super::column_break::ColumnBreak;
 use super::table_cell::TableCell;
+use crate::content::{CellWidth};
 
 pub struct CellIterator<'a> {
     cells: &'a Vec<TableCell>,
@@ -86,7 +86,7 @@ impl TableRow {
     pub fn format(
         self: &TableRow,
         border: &Border,
-        column_breaks: &Vec<ColumnBreak>
+        column_breaks: &Vec<CellWidth>
     ) -> String {
         let mut result: String = String::from("");
 
@@ -101,14 +101,14 @@ impl TableRow {
         }
 
         // Iterate the number of lines
-        let content_break = ColumnBreak::default();
+        let content_break = CellWidth::default();
         for _line_ix in 0..row_height {
             // Left border
             result.push_str(&border.format_left());
             // Write the contents for the current line of the cell
             for cell_ix in 0..self.cells.len() {
                 let cell = &self.cells[cell_ix];
-                let column_break: &ColumnBreak =
+                let column_break: &CellWidth =
                     if cell_ix < column_breaks.len() {
                         &column_breaks[cell_ix]
                     } else {
@@ -147,16 +147,16 @@ impl TableRow {
     /// * `columns` - The columns used to format the cells for this row.
     pub fn measure_height(
         self: &TableRow,
-        column_breaks: &Vec<ColumnBreak>,
+        column_breaks: &Vec<CellWidth>,
     ) -> usize {
         let mut tallest_height = 0;
 
         // Iterate the row cells and measure based upon supplied column breaks
         let column_break_ix = 0;
-        let content_break = ColumnBreak::Content;
+        let content_break = CellWidth::Content;
         for cell in &self.cells {
             // Get the next column break (if one is available)
-            let column_break: &ColumnBreak = 
+            let column_break: &CellWidth = 
                 if column_break_ix < column_breaks.len() {
                     &column_breaks[column_break_ix]
                 } else {

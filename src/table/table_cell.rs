@@ -1,5 +1,4 @@
-use crate::content::{Content, ContentIterator, ContentStyle};
-use super::column_break::ColumnBreak;
+use crate::content::{Content, ContentIterator, ContentStyle, CellWidth};
 use crate::data_item::DataItem;
 use std::clone::Clone;
 use std::str::FromStr;
@@ -161,16 +160,16 @@ impl TableCell {
     /// 
     /// This is used to determine the column break for cells used in the table 
     /// header row.
-    pub fn get_break_from_content(
+    pub fn get_cell_width(
         self: &TableCell
-    ) -> ColumnBreak {
+    ) -> CellWidth {
         if self.contents.len() > 0 {
             match &self.contents[0].style {
                 Some(style) => style.width.clone(), 
-                None => ColumnBreak::default()
+                None => CellWidth::default()
             }
         } else {
-            ColumnBreak::default()
+            CellWidth::default()
         }
     }
 
@@ -182,7 +181,7 @@ impl TableCell {
     /// * `width` - The format width.
     pub fn get_iterator(
         self: &TableCell,
-        column_break: &ColumnBreak
+        column_break: &CellWidth
     ) -> TableCellContentIterator {
         // Determine the render width of this cell
         let cell_width = self.measure_width(column_break);
@@ -208,7 +207,7 @@ impl TableCell {
     /// * `column_width` - The column width to measure against.
     pub fn measure_height(
         self: &TableCell,
-        column_break: &ColumnBreak,
+        column_break: &CellWidth,
     ) -> usize {
         let mut height = 0;
 
@@ -237,11 +236,11 @@ impl TableCell {
     /// * `column_break` - The column break for this cell.
     pub fn measure_width(
         self: &TableCell,
-        column_break: &ColumnBreak,
+        column_break: &CellWidth,
     ) -> usize {
         match column_break {
-            ColumnBreak::Fixed(fixed) => *fixed,
-            ColumnBreak::Minimum(minimum_width) => {
+            CellWidth::Fixed(fixed) => *fixed,
+            CellWidth::Minimum(minimum_width) => {
                 let content_width = self.measure_content_width();
                 if minimum_width > &content_width {
                     *minimum_width
@@ -249,7 +248,7 @@ impl TableCell {
                     content_width
                 }
             },
-            ColumnBreak::Content => {
+            CellWidth::Content => {
                 self.measure_content_width()
             }
         }
@@ -295,7 +294,7 @@ mod tests {
                     None,
                     Alignment::Left,
                     Wrap::Wrap,
-                    ColumnBreak::Content
+                    CellWidth::Content
                 ))
             ))
         );

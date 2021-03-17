@@ -56,11 +56,6 @@ impl Wrap {
     }
 }
 
-
-
-
-
-
 #[allow(unused_macros)]
 #[macro_export]
 macro_rules! content_style {
@@ -72,8 +67,8 @@ macro_rules! content_style {
 /// Represents the style to apply to a line of content.
 #[derive(Debug, Clone)]
 pub struct ContentStyle {
-    pub fg_color: Option<Color>,
-    pub bg_color: Option<Color>,
+    pub foreground_color: Option<Color>,
+    pub background_color: Option<Color>,
     pub alignment: Alignment,
     pub wrap: Wrap,
     pub width: CellWidth
@@ -82,8 +77,8 @@ pub struct ContentStyle {
 impl ContentStyle {
     pub fn default() -> ContentStyle {
         ContentStyle {
-            fg_color: None,
-            bg_color: None,
+            foreground_color: None,
+            background_color: None,
             alignment: Alignment::Left,
             wrap: Wrap::Truncate,
             width: CellWidth::Content,
@@ -91,15 +86,15 @@ impl ContentStyle {
     }
 
     pub fn new(
-        fg_color: Option<Color>,
-        bg_color: Option<Color>,
+        foreground_color: Option<Color>,
+        background_color: Option<Color>,
         alignment: Alignment,
         wrap: Wrap,
         width: CellWidth
     ) -> ContentStyle {
         ContentStyle {
-            fg_color,
-            bg_color,
+            foreground_color,
+            background_color,
             alignment,
             wrap,
             width,
@@ -118,7 +113,7 @@ impl ContentStyle {
            
             // Foreground color
             match ContentStyle::color_from_token(token) {
-                Some(color) => style.fg_color = Some(color),
+                Some(color) => style.foreground_color = Some(color),
                 None => {}
             }
             // Alignment
@@ -136,7 +131,7 @@ impl ContentStyle {
             if token == '-' {
                 // Avoid problem if - is last token (with no color code)
                 if tokens.len() > token_ix + 1 {
-                    style.bg_color = 
+                    style.background_color = 
                         ContentStyle::color_from_token(tokens[token_ix + 1]);
                     // Consume next token (to skip the background color code)
                     token_ix += 1;
@@ -174,32 +169,6 @@ impl ContentStyle {
         style
     }
 
-    // fn parse_cell_width(
-    //     tt: Vec<char>,
-    //     t_ix: &mut usize
-    // ) -> Option<CellWidth> {
-    //     match tt[*t_ix] {
-    //         ':' | '|' => {
-
-    //         }
-    //         _ => None
-    //     }
-
-
-    //     if let Some(n) = s.find(token) {
-    //         let width = s[1..n].parse::<usize>().unwrap();
-    //     } else {
-    //         Result<None, 0>
-    //     }
-    //     match  {
-    //         Some(ix) => { 
-    //             style.width = CellWidth::Fixed(width);
-    //             token_ix += ix + 1;
-    //         }
-    //         None => { /* Ignore (no matching token) */ }
-    //     }
-    // }
-
     fn color_from_token(
         token: char
     ) -> Option<Color> {
@@ -236,8 +205,8 @@ mod tests {
    
         let expected = 
             ContentStyle {
-                fg_color: Some(Color::Cyan),
-                bg_color: None,
+                foreground_color: Some(Color::Cyan),
+                background_color: None,
                 alignment: Alignment::Center,
                 wrap: Wrap::Wrap,
                 width: CellWidth::Fixed(15)

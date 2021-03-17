@@ -139,11 +139,12 @@ impl Content {
         let mut result = Content::pad(line, &style.alignment, width);
 
         // Apply colors
-        if style.fg_color != None {
-            result = result.color(style.fg_color.unwrap()).to_string();
+        if style.foreground_color != None {
+            result = result.color(style.foreground_color.unwrap()).to_string();
         }
-        if style.bg_color != None {
-            result = result.on_color(style.bg_color.unwrap()).to_string();
+        if style.background_color != None {
+            result = 
+                result.on_color(style.background_color.unwrap()).to_string();
         }
 
         result   

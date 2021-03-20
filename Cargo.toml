@@ -17,7 +17,6 @@ categories = ["command-line-utilities", "command-line-interface", "development-t
 
 [dependencies]
 colored = "2.0.0"
-delim = "0.1.0"
 
 [lib]
 name="libtableformat"

@@ -1,6 +1,5 @@
 use super::data_item::DataItem;
-use colored::Color;
-use super::content::{Content, ContentStyle};
+use super::content::Content;
 
 pub struct VecDataSource<T> {
     current_ix: usize,

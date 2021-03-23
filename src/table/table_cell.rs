@@ -1,7 +1,6 @@
 use crate::content::{Content, ContentIterator, ContentStyle, CellWidth};
 use crate::data_item::DataItem;
 use std::clone::Clone;
-use std::str::FromStr;
 
 pub struct TableCellContentIterator<'a> {
     content: &'a Vec<Content>,
@@ -117,24 +116,20 @@ impl TableCell {
         contents: Vec<&str>,
     ) -> TableCell {
         // Split the format string into style tokens
-        let styles: Vec<&str> = 
-            format.split(" ").collect();
-        let mut style_ix = 0;
+        let styles: Vec<&str> = format.split(' ').collect();
         let mut table_cell = TableCell::empty();
 
         // Iterate the contents
-        for content in contents {
+        for (style_ix, content) in contents.into_iter().enumerate() {
             // Get next style (use default if no more styles provided)
             let style = 
                 if style_ix < styles.len() { 
                     ContentStyle::from_format(styles[style_ix]) }
                 else { ContentStyle::default() };
-            
+
             // Add the new styled content
             table_cell.contents.push(
                 Content::new(content.to_string(), Some(style)));
-
-            style_ix += 1;
         }
         table_cell
     }
@@ -150,7 +145,7 @@ impl TableCell {
         base_style: ContentStyle,
     ) -> TableCell {
         TableCell::new(
-            data_item.lines.iter().map(|c| c.clone()).collect::<Vec<Content>>(), 
+            data_item.lines.to_vec(),
             base_style,
         )
     }
@@ -163,7 +158,7 @@ impl TableCell {
     pub fn get_cell_width(
         self: &TableCell
     ) -> CellWidth {
-        if self.contents.len() > 0 {
+        if self.contents.is_empty() {
             match &self.contents[0].style {
                 Some(style) => style.width.clone(), 
                 None => CellWidth::default()
@@ -176,9 +171,7 @@ impl TableCell {
     /// Returns the next formatted line of content from this table cell.
     /// 
     /// # Arguments
-    /// 
-    /// * `self` - The table cell containing the line.
-    /// * `width` - The format width.
+    /// * `self` - The table cell containing the line.  * `width` - The format width.
     pub fn get_iterator(
         self: &TableCell,
         column_break: &CellWidth

@@ -1,5 +1,4 @@
-use std::str::FromStr;
-use colored::{Color, Colorize};
+use colored::Color;
 
 #[derive(Debug, Clone)]
 pub enum CellWidth {
@@ -110,21 +109,18 @@ impl ContentStyle {
         let mut token_ix = 0;
         while token_ix < tokens.len() {
             let token = tokens[token_ix];
-           
+
             // Foreground color
-            match ContentStyle::color_from_token(token) {
-                Some(color) => style.foreground_color = Some(color),
-                None => {}
+            if let Some(color) = ContentStyle::color_from_token(token) {
+                style.foreground_color = Some(color)
             }
             // Alignment
-            match Alignment::from_token(token) {
-                Some(alignment) => style.alignment = alignment,
-                None => {}
+            if let Some(alignment) = Alignment::from_token(token) {
+                style.alignment = alignment
             }
             // Wrap
-            match Wrap::from_token(token) {
-                Some(wrap) => style.wrap = wrap,
-                None => {}
+            if let Some(wrap) = Wrap::from_token(token) {
+                style.wrap = wrap
             }
 
             // Background color (consumes two tokens)
@@ -142,26 +138,22 @@ impl ContentStyle {
             // Width specifier (consumes until matching token)
             if token == ':' {
                 // TODO: Clean up this logic (should be a common width fn)
-                match format[token_ix+1..tokens.len()+1].find(':') {
-                    Some(ix) => {
-                        let width = format[token_ix+1..token_ix+ix+1].parse::<usize>().unwrap();
-                        style.width = CellWidth::Fixed(width);
-                        token_ix += ix + 1;
-                    }
-                    None => { /* Ignore (no matching token) */ }
+                if let Some(ix) = format[token_ix+1..tokens.len()+1].find(':') {
+                    let width = format[token_ix+1..token_ix+ix+1].parse::<usize>().unwrap();
+                    style.width = CellWidth::Fixed(width);
+                    token_ix += ix + 1;
+
                 }
             }
 
             // Width specifier (consumes until matching token)
             if token == '|' {
                 // TODO: Clean up this logic (should be a common width fn)
-                match format[token_ix+1..tokens.len()+1].find('|') {
-                    Some(ix) => {
+
+                if let Some(ix) = format[token_ix+1..tokens.len()+1].find('|') {
                         let width = format[token_ix+1..token_ix+ix+1].parse::<usize>().unwrap();
                         style.width = CellWidth::Minimum(width);
                         token_ix += ix + 1;
-                    }
-                    None => { /* Ignore (no matching token) */ }
                 }
             }
         }

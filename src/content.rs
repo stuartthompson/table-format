@@ -1,7 +1,6 @@
 mod content_style;
 
-use std::fmt::Display;
-use colored::{Color, Colorize};
+use colored::Colorize;
 pub use content_style::{ContentStyle, Alignment, Wrap, CellWidth};
 
 pub struct ContentIterator {
@@ -15,7 +14,7 @@ impl Iterator for ContentIterator {
         if self.next_part_ix < self.parts.len() {
             // Get the next line part
             let line_part = self.parts[self.next_part_ix].to_string();
-            
+
             // Increment the line part counter
             self.next_part_ix += 1;
 
@@ -39,14 +38,14 @@ impl std::str::FromStr for Content {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Content { content: s.to_string(), style: None })
-    } 
+    }
 }
 
 impl Content {
     /// Returns a new content item.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `content` - The string content.
     /// * `style` - The content style.
     pub fn new(
@@ -57,12 +56,12 @@ impl Content {
             content,
             style
         }
-    } 
+    }
 
     /// Returns an iterator for the line parts of a content.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `self` - The content to iterate.
     /// * `base_style` - The base style to use if no content style is defined.
     /// * `width` - The width at which to wrap or truncate.
@@ -80,7 +79,7 @@ impl Content {
             Some(style) => style,
             None => &base_style
         };
-            
+
         match style.wrap {
             // Truncate on single line
             Wrap::Truncate => {
@@ -89,7 +88,7 @@ impl Content {
                     result.push(
                         Content::format(
                             &self.content,
-                            &style, 
+                            &style,
                             width
                         )
                     );
@@ -107,18 +106,18 @@ impl Content {
             Wrap::Wrap => {
                 let num_lines = self.measure_height(width);
                 let partial_line_len = content_len.rem_euclid(width);
-                
+
                 // Collect the line parts
                 for line_ix in 0..num_lines {
                     let from = line_ix * width;
-                    let to = 
+                    let to =
                         if line_ix < num_lines - 1 { from + width }
                         else { from + partial_line_len };
-                
+
                     result.push(
                         Content::format(
-                            &self.content[from..to], 
-                            &style, 
+                            &self.content[from..to],
+                            &style,
                             width)
                     );
                 }
@@ -143,11 +142,11 @@ impl Content {
             result = result.color(style.foreground_color.unwrap()).to_string();
         }
         if style.background_color != None {
-            result = 
+            result =
                 result.on_color(style.background_color.unwrap()).to_string();
         }
 
-        result   
+        result
     }
 
     fn pad(
@@ -165,15 +164,15 @@ impl Content {
             match alignment {
                 Alignment::Left => {
                     format!("{}{}",
-                        line,    
+                        line,
                         (0..padding)
                                 .map(|_| " ")
-                                .collect::<String>(),        
+                                .collect::<String>(),
                     )
                 }
                 Alignment::Center => {
                     let left_pad = padding / 2;
-                    let right_pad = 
+                    let right_pad =
                         if padding.rem_euclid(2) == 0 { padding / 2 }
                         else { (padding / 2) + 1 };
                     format!("{}{}{}",
@@ -199,9 +198,9 @@ impl Content {
     }
 
     /// Measures the width of content.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `self` - The content to measure.
     pub fn measure_width(
         self: &Content
@@ -210,12 +209,12 @@ impl Content {
     }
 
     /// Measures the height of this content if formatted to a specific width.
-    /// 
-    /// This is useful for determining if content will use additional height 
+    ///
+    /// This is useful for determining if content will use additional height
     ///  when wrapped.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `self` - The content being measured.
     /// * `width` - The width the content is being measured into.
     pub fn measure_height(
@@ -228,9 +227,9 @@ impl Content {
 
             // Calculate number of whole lines needed
             let mut height = content_len.div_euclid(width);
-            
+
             // Check if there is a final partial line
-            let partial_line_len = content_len.rem_euclid(width); 
+            let partial_line_len = content_len.rem_euclid(width);
             if partial_line_len != 0 {
                 height += 1;
             }
@@ -244,9 +243,9 @@ impl Content {
     }
 
     /// Returns a flag indicating whether this content will wrap.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `self` - The content being measured.
     pub fn will_wrap(
         self: &Content

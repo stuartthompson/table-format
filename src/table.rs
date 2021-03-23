@@ -8,8 +8,6 @@ use super::data_item::DataItem;
 use table_cell::TableCell;
 use table_row::TableRow;
 use crate::content::{ContentStyle, CellWidth};
-use crate::vec_data_source::VecDataSource;
-use crate::{row,content_style};
 
 #[allow(unused_macros)]
 #[macro_export]
@@ -30,9 +28,9 @@ macro_rules! table {
     {
         Table::from_vec(
             // Header specification
-            row!($($style => $header), *),
+            crate::row!($($style => $header), *),
             // Base cell styles
-            vec!($(content_style!($cell_style)),*),
+            vec!($(crate::content_style!($cell_style)),*),
             // Data
             vec!($($data),*)
         )
@@ -199,10 +197,10 @@ impl Table {
         let mut result: String = String::from("");
 
         let header_width = self.measure_width();
-        
+
         // Print top border
         result.push_str(&self.border.format_top(header_width));
-        result.push_str("\n");
+        result.push('\n');
 
         // Render column header row
         result.push_str(
@@ -214,7 +212,7 @@ impl Table {
 
         // Print horizontal split beneath headers
         result.push_str(&self.border.format_horizontal_split(header_width));
-        result.push_str("\n");
+        result.push('\n');
 
         result
     }
@@ -246,18 +244,18 @@ impl Table {
                     &self.column_breaks
                 )
             );
-        
+
             // Print horizontal split beneath all but last row
             if row_ix < self.data_rows.len() - 1 {
                 result.push_str(
                     &self.border.format_horizontal_split(render_width));
-                result.push_str("\n");
+                result.push('\n');
             }
         }
 
         // Print bottom border at end of table
         result.push_str(&self.border.format_bottom(render_width));
-        result.push_str("\n");
+        result.push('\n');
 
         result
     }

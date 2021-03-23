@@ -5,7 +5,6 @@ mod table_data_source;
 mod vec_data_source;
 pub mod table;
 
-use table::Table;
 pub use content::ContentStyle;
 
 #[cfg(test)]

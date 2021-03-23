@@ -46,6 +46,12 @@ pub struct TableRow {
     cells: Vec<TableCell>
 }
 
+impl Default for TableRow {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl TableRow {
     pub fn new() -> TableRow {
         TableRow {
@@ -72,21 +78,25 @@ impl TableRow {
         }
     }
 
-    pub fn len(self: &TableRow) -> usize { 
+    pub fn len(self: &TableRow) -> usize {
         self.cells.len()
     }
 
+    pub fn is_empty(self: &TableRow) -> bool {
+        self.len() == 0
+    }
+
     /// Formats a table row.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `self` - The table row to format.
     /// * `border` - The table border.
     /// * `column_breaks` - The breakpoints at which to wrap or truncate.
     pub fn format(
         self: &TableRow,
         border: &Border,
-        column_breaks: &Vec<CellWidth>
+        column_breaks: &[CellWidth]
     ) -> String {
         let mut result: String = String::from("");
 
@@ -97,7 +107,7 @@ impl TableRow {
         for cell_ix in 0..self.cells.len() {
             let cell = &self.cells[cell_ix];
             let column_break = &column_breaks[cell_ix];
-            content_iterators.push(cell.get_iterator(&column_break));    
+            content_iterators.push(cell.get_iterator(&column_break));
         }
 
         // Iterate the number of lines
@@ -116,13 +126,13 @@ impl TableRow {
                     };
                 result.push_str(
                     &match content_iterators[cell_ix].next() {
-                        Some(content) => format!("{}", content),
+                        Some(content) => content.to_string(),
                         None => {
                             // No more lines so fill height with empty space
                             let cell_width = cell.measure_width(column_break);
-                            format!("{}", (0..cell_width)
+                            (0..cell_width)
                                 .map(|_| " ")
-                                .collect::<String>())
+                                .collect::<String>()
                         }
                     }
                 );
@@ -133,7 +143,7 @@ impl TableRow {
             }
             // Right border
             result.push_str(&border.format_right());
-            result.push_str("\n");
+            result.push('\n');
         }
 
         result
@@ -147,7 +157,7 @@ impl TableRow {
     /// * `columns` - The columns used to format the cells for this row.
     pub fn measure_height(
         self: &TableRow,
-        column_breaks: &Vec<CellWidth>,
+        column_breaks: &[CellWidth],
     ) -> usize {
         let mut tallest_height = 0;
 

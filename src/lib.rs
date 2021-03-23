@@ -11,6 +11,7 @@ pub use content::ContentStyle;
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::env;
     use table::table_row::TableRow;
     use table::table_cell::TableCell;
 
@@ -23,12 +24,12 @@ mod tests {
 
         let output = table.format();
 
-        let expected = String::from("+--------------------------+\n|\u{1b}[36m     Food      \u{1b}[0m|\u{1b}[36m  Count   \u{1b}[0m|\n+--------------------------+\n|Fish           |3         |\n+--------------------------+\n|Pears          |5         |\n+--------------------------+\n|Pizza          |13        |\n+--------------------------+\n");
+        let expected = 
+            match env::var("NO_COLOR") {
+                Ok(_) => "+--------------------------+\n|     Food      |  Count   |\n+--------------------------+\n|Fish           |3         |\n+--------------------------+\n|Pears          |5         |\n+--------------------------+\n|Pizza          |13        |\n+--------------------------+\n",
+                Err(_) => "+--------------------------+\n|\u{1b}[36m     Food      \u{1b}[0m|\u{1b}[36m  Count   \u{1b}[0m|\n+--------------------------+\n|Fish           |3         |\n+--------------------------+\n|Pears          |5         |\n+--------------------------+\n|Pizza          |13        |\n+--------------------------+\n",
+            };
 
-        println!("1-------10--------20--------30--------40--------50--------60--------70--------80");
-        println!("''''5''''|''''5''''|''''5''''|''''5''''|''''5''''|''''5''''|''''5''''|''''5''''|");
-        println!("{}", output);
-
-        assert_eq!(expected, output);
+        assert_eq!(output, expected);
     }
 }

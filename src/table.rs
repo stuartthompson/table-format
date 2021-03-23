@@ -306,6 +306,7 @@ impl Table {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::env;
     use colored::Color;
     use crate::content::{Content, Alignment, Wrap};
     use crate::data_item::DataItem;
@@ -324,9 +325,15 @@ mod tests {
             "Fish", "15", "Pizza", "10", "Tomato", "24"
         );
 
-        println!("{}", table.format());
+        let expected = 
+            match env::var("NO_COLOR") {
+                Ok(_) => "+--------------------+\n|    Food    | Count |\n+--------------------+\n|Fish        |15     |\n+--------------------+\n|Pizza       |10     |\n+--------------------+\n|Tomato      |24     |\n+--------------------+\n",
+                Err(_) => "+--------------------+\n|\u{1b}[94m    Food    \u{1b}[0m|\u{1b}[92m Count \u{1b}[0m|\n+--------------------+\n|Fish        |15     |\n+--------------------+\n|Pizza       |10     |\n+--------------------+\n|Tomato      |24     |\n+--------------------+\n",
+            };
 
-        let expected = "+--------------------+\n|\u{1b}[94m    Food    \u{1b}[0m|\u{1b}[92m Count \u{1b}[0m|\n+--------------------+\n|Fish        |15     |\n+--------------------+\n|Pizza       |10     |\n+--------------------+\n|Tomato      |24     |\n+--------------------+\n";
+        println!("Expected is: {}", expected);
+
+        println!("{}", table.format());
 
         assert_eq!(
             table.format(),
@@ -344,7 +351,11 @@ mod tests {
 
         println!("{}", table.format());
 
-        let expected = "+---------------------+\n|\u{1b}[35m      Item\u{1b}[0m|\u{1b}[35m     Price\u{1b}[0m|\n+---------------------+\n|\u{1b}[36m  Basic   \u{1b}[0m|\u{1b}[32m$5,000    \u{1b}[0m|\n+---------------------+\n|\u{1b}[36m  Super   \u{1b}[0m|\u{1b}[32m$12,000   \u{1b}[0m|\n+---------------------+\n|\u{1b}[36m Ultimate \u{1b}[0m|\u{1b}[32m$35,000   \u{1b}[0m|\n+---------------------+\n";
+        let expected = 
+            match env::var("NO_COLOR") {
+                Ok(_) => "+---------------------+\n|      Item|     Price|\n+---------------------+\n|  Basic   |$5,000    |\n+---------------------+\n|  Super   |$12,000   |\n+---------------------+\n| Ultimate |$35,000   |\n+---------------------+\n",
+                Err(_) => "+---------------------+\n|\u{1b}[35m      Item\u{1b}[0m|\u{1b}[35m     Price\u{1b}[0m|\n+---------------------+\n|\u{1b}[36m  Basic   \u{1b}[0m|\u{1b}[32m$5,000    \u{1b}[0m|\n+---------------------+\n|\u{1b}[36m  Super   \u{1b}[0m|\u{1b}[32m$12,000   \u{1b}[0m|\n+---------------------+\n|\u{1b}[36m Ultimate \u{1b}[0m|\u{1b}[32m$35,000   \u{1b}[0m|\n+---------------------+\n"
+            };
 
         assert_eq!(
             table.format(),

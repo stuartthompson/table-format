@@ -1,30 +1,8 @@
 mod content_style;
 
 use colored::Colorize;
+pub use super::content_iterator::{ContentIterator};
 pub use content_style::{ContentStyle, Alignment, Wrap, CellWidth};
-
-pub struct ContentIterator {
-    parts: Vec<String>,
-    next_part_ix: usize
-}
-
-impl Iterator for ContentIterator {
-    type Item = String;
-    fn next(&mut self) -> Option<String> {
-        if self.next_part_ix < self.parts.len() {
-            // Get the next line part
-            let line_part = self.parts[self.next_part_ix].to_string();
-
-            // Increment the line part counter
-            self.next_part_ix += 1;
-
-            // Return the line part
-            Some(line_part)
-        } else {
-            None
-        }
-    }
-}
 
 /// Represents a line of content.
 #[derive(Debug, Clone)]
@@ -124,10 +102,7 @@ impl Content {
             },
         }
 
-        ContentIterator {
-            parts: result,
-            next_part_ix: 0
-        }
+        ContentIterator::new(result)
     }
 
     fn format(

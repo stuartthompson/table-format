@@ -305,10 +305,6 @@ impl Table {
 mod tests {
     use super::*;
     use std::env;
-    use colored::Color;
-    use crate::content::{Content, Alignment, Wrap};
-    use crate::data_item::DataItem;
-    use crate::cell;
 
     /// Tests the simple format table! macro.
     /// 

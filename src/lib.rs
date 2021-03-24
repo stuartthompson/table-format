@@ -2,7 +2,6 @@ mod content;
 mod data_item;
 mod data_source;
 mod table_data_source;
-mod vec_data_source;
 pub mod table;
 
 pub use content::ContentStyle;

@@ -151,7 +151,7 @@ impl Cell {
         base_style: ContentStyle,
     ) -> Cell {
         Cell::new(
-            data_item.lines.to_vec(),
+            data_item.lines.clone(),
             base_style,
         )
     }

@@ -92,6 +92,10 @@ impl Table {
     /// * `column_headers` - The header row describes how to split the data.
     /// * `cell_styles` - The base styles to apply to each cell.
     /// * `data` - A vector containing the data for the table body.
+    ///
+    /// # Panics
+    ///
+    /// If a data item cannot be parsed.
     #[must_use]
     pub fn from_vec(
         column_headers: Row,

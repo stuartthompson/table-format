@@ -102,6 +102,15 @@ impl ContentStyle {
         }
     }
 
+    /// Returns a `ContentStyle` from a format string.
+    ///
+    /// # Arguments
+    ///
+    /// * `format` - The format string to parse.
+    ///
+    /// # Panics
+    ///
+    /// If width specifiers are not well formatted.
     #[must_use]
     pub fn from_format(format: &str) -> ContentStyle {
         // Start with defaults

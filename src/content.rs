@@ -264,5 +264,32 @@ impl Content {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+    use crate::content_style;
 
+    #[test]
+    fn test_format() {
+        let expected = "Test    ";
+
+        assert_eq!(
+            Content::format(
+                "Test",
+                &content_style!("{:8:}"),
+                8),
+            expected
+        );
+    }
+
+    #[test]
+    fn test_pad() {
+        let expected = "Test  ";
+
+        assert_eq!(
+            Content::pad(
+                "Test",
+                &Alignment::Left,
+                6),
+            expected
+        );
+    }
 }

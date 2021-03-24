@@ -60,7 +60,7 @@ impl Wrap {
 macro_rules! content_style {
     ( $style:literal ) => {
         ContentStyle::from_format($style)
-    }    
+    }
 }
 
 /// Represents the style to apply to a line of content.
@@ -142,7 +142,6 @@ impl ContentStyle {
                     let width = format[token_ix+1..token_ix+ix+1].parse::<usize>().unwrap();
                     style.width = CellWidth::Fixed(width);
                     token_ix += ix + 1;
-
                 }
             }
 

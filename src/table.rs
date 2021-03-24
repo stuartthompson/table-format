@@ -126,7 +126,7 @@ impl Table {
             I: Iterator<Item=&'a DataItem>
     {
         let mut data_rows = Vec::new();
-        
+
         // Derive column breaks from column headers
         let mut column_breaks: Vec<CellWidth> = Vec::new();
         for cell in column_headers.iter() {
@@ -329,10 +329,6 @@ mod tests {
                 Err(_) => "+--------------------+\n|\u{1b}[94m    Food    \u{1b}[0m|\u{1b}[92m Count \u{1b}[0m|\n+--------------------+\n|Fish        |15     |\n+--------------------+\n|Pizza       |10     |\n+--------------------+\n|Tomato      |24     |\n+--------------------+\n",
             };
 
-        println!("Expected is: {}", expected);
-
-        println!("{}", table.format());
-
         assert_eq!(
             table.format(),
             expected
@@ -346,8 +342,6 @@ mod tests {
             "{c^}", "{g<}";
             "Basic", "$5,000", "Super", "$12,000", "Ultimate", "$35,000"
         );
-
-        println!("{}", table.format());
 
         let expected = 
             match env::var("NO_COLOR") {

@@ -11,13 +11,14 @@ pub use content::ContentStyle;
 mod tests {
     use super::*;
     use std::env;
+    use table::Table;
     use table::table_row::TableRow;
     use table::table_cell::TableCell;
 
     #[test]
     fn test_simple_vector_table() {
         let table = table!(
-            "{c^:15:}" => "Food", "{c^:10:}" => "Count"; 
+            "{c^:15:}" => "Food", "{c^:10:}" => "Count";
             "Fish", "3", "Pears", "5", "Pizza", "13"
         );
 

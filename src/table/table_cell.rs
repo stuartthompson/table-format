@@ -158,9 +158,9 @@ impl TableCell {
     pub fn get_cell_width(
         self: &TableCell
     ) -> CellWidth {
-        if self.contents.is_empty() {
+        if !self.contents.is_empty() {
             match &self.contents[0].style {
-                Some(style) => style.width.clone(), 
+                Some(style) => style.width.clone(),
                 None => CellWidth::default()
             }
         } else {

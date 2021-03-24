@@ -13,9 +13,9 @@ or for inclusion in logs.
 * v0.0.1 - Initial files. Tests are passing. Table header formats.
 * v0.0.2 - Table macros. Base cell styles. Color codes for initial elements.
 * v0.0.3 - ColumnBreak->CellWidth. Now a part of content style.
+* v0.0.4 - Linting, bug fixes, test cleanup. More test coverage.
 
 ## Roadmap
-* v0.0.4 - Bug fixes and unit test cleanup. Expanded test coverage.
 * v0.0.5 - Examples and README improvement.
 * v0.1.0 - Documentation cleanup pass. Get what is there clean and tidy.
 

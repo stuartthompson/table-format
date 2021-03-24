@@ -19,27 +19,23 @@ impl<'a> Iterator for TableCellContentIterator<'a> {
         let line = 
             if self.current_line_ix < self.content.len() {
                 // Get the next line from the current content iterator
-                match self.current_content_iterator.next() {
-                    Some(content) => {
-                        Some(content)
-                    },
-                    None => {
-                        // Go to the next line
-                        self.current_line_ix += 1;
+                self.current_content_iterator.next().map_or_else(|| {
+                    // Go to the next line
+                    self.current_line_ix += 1;
 
-                        // If there are more lines, get iterator for next line
-                        if self.current_line_ix < self.content.len() {
-                            self.current_content_iterator = 
-                                self.content[self.current_line_ix].get_iterator(self.base_style.clone(), self.width);
+                    // If there are more lines, get iterator for next line
+                    if self.current_line_ix < self.content.len() {
+                        self.current_content_iterator = 
+                            self.content[self.current_line_ix].get_iterator(
+                                &self.base_style.clone(), self.width);
 
-                            // Get the line from the iterator
-                            self.current_content_iterator.next()
-                        } else {
-                            // No more lines to get
-                            None
-                        }
+                        // Get the line from the iterator
+                        self.current_content_iterator.next()
+                    } else {
+                        // No more lines to get
+                        None
                     }
-                }
+                }, Some)
             } else {
                 None
             };
@@ -85,7 +81,7 @@ macro_rules! cell {
 }
 
 /// A table cell represents a single grid rectangle within a table.
-/// 
+///
 /// Cells belong to a row.
 #[derive(Debug)]
 pub struct Cell {
@@ -94,6 +90,7 @@ pub struct Cell {
 }
 
 impl Cell {
+    #[must_use]
     pub fn empty() -> Cell {
         Cell {
             contents: Vec::new(),
@@ -101,6 +98,7 @@ impl Cell {
         }
     }
 
+    #[must_use]
     pub fn new(
         contents: Vec<Content>,
         base_style: ContentStyle,
@@ -111,6 +109,13 @@ impl Cell {
         }
     }
 
+    /// Returns a `Cell` from styled content.
+    ///
+    /// # Arguments
+    ///
+    /// * `format` - The style format.
+    /// * `contents` - The contents of the new cell.
+    #[must_use]
     pub fn from_styled_content(
         format: &str,
         contents: Vec<&str>,
@@ -134,12 +139,13 @@ impl Cell {
         table_cell
     }
 
-    /// Returns a TableCell from a DataItem.
-    /// 
+    /// Returns a `Cell` from a `DataItem`.
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `data_item` - The data item from which to build the table cell.
     /// * `base_style` - The base style to apply to the cell contents.
+    #[must_use]
     pub fn from_data_item(
         data_item: &DataItem,
         base_style: ContentStyle,
@@ -150,11 +156,12 @@ impl Cell {
         )
     }
 
-    /// Returns the column break specified in the first content line of the 
+    /// Returns the column break specified in the first content line of the
     /// cell.
-    /// 
-    /// This is used to determine the column break for cells used in the table 
+    ///
+    /// This is used to determine the column break for cells used in the table
     /// header row.
+    #[must_use]
     pub fn get_cell_width(
         self: &Cell
     ) -> CellWidth {
@@ -169,9 +176,12 @@ impl Cell {
     }
 
     /// Returns the next formatted line of content from this table cell.
-    /// 
+    ///
     /// # Arguments
-    /// * `self` - The table cell containing the line.  * `width` - The format width.
+    ///
+    /// * `self` - The table cell containing the line.
+    /// * `width` - The format width.
+    #[must_use]
     pub fn get_iterator(
         self: &Cell,
         column_break: &CellWidth
@@ -182,7 +192,7 @@ impl Cell {
         TableCellContentIterator {
             content: &self.contents,
             current_content_iterator: 
-                self.contents[0].get_iterator(self.base_style.clone(), cell_width),
+                self.contents[0].get_iterator(&self.base_style.clone(), cell_width),
             current_line_ix: 0,
             base_style: self.base_style.clone(),
             width: cell_width,
@@ -191,13 +201,14 @@ impl Cell {
         }
     }
 
-    /// Measures the height needed for this cell when formatting its contents 
+    /// Measures the height needed for this cell when formatting its contents
     ///  into a specific column width.
-    /// 
+    ///
     ///  # Arguments
-    /// 
+    ///
     /// * `self` - The table cell being measured.
     /// * `column_width` - The column width to measure against.
+    #[must_use]
     pub fn measure_height(
         self: &Cell,
         column_break: &CellWidth,
@@ -224,9 +235,10 @@ impl Cell {
     /// Measures the width of this cell.
     ///
     /// # Arguments
-    /// 
+    ///
     /// * `self` - The table cell being measured.
     /// * `column_break` - The column break for this cell.
+    #[must_use]
     pub fn measure_width(
         self: &Cell,
         column_break: &CellWidth,
@@ -248,8 +260,8 @@ impl Cell {
     }
 
     /// Returns the width of the longest content item in this cell.
-    /// 
-    /// This measure ignores wrapping or truncation and returns the raw width 
+    ///
+    /// This measure ignores wrapping or truncation and returns the raw width
     ///  of the longest content item.
     fn measure_content_width(
         self: &Cell

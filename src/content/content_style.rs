@@ -74,6 +74,7 @@ pub struct ContentStyle {
 }
 
 impl ContentStyle {
+    #[must_use]
     pub fn default() -> ContentStyle {
         ContentStyle {
             foreground_color: None,
@@ -84,6 +85,7 @@ impl ContentStyle {
         }
     }
 
+    #[must_use]
     pub fn new(
         foreground_color: Option<Color>,
         background_color: Option<Color>,
@@ -100,6 +102,7 @@ impl ContentStyle {
         }
     }
 
+    #[must_use]
     pub fn from_format(format: &str) -> ContentStyle {
         // Start with defaults
         let mut style = ContentStyle::default();
@@ -138,8 +141,8 @@ impl ContentStyle {
             // Width specifier (consumes until matching token)
             if token == ':' {
                 // TODO: Clean up this logic (should be a common width fn)
-                if let Some(ix) = format[token_ix+1..tokens.len()+1].find(':') {
-                    let width = format[token_ix+1..token_ix+ix+1].parse::<usize>().unwrap();
+                if let Some(ix) = format[token_ix+1..=tokens.len()].find(':') {
+                    let width = format[token_ix+1..=token_ix+ix].parse::<usize>().unwrap();
                     style.width = CellWidth::Fixed(width);
                     token_ix += ix + 1;
                 }
@@ -149,8 +152,8 @@ impl ContentStyle {
             if token == '|' {
                 // TODO: Clean up this logic (should be a common width fn)
 
-                if let Some(ix) = format[token_ix+1..tokens.len()+1].find('|') {
-                        let width = format[token_ix+1..token_ix+ix+1].parse::<usize>().unwrap();
+                if let Some(ix) = format[token_ix+1..=tokens.len()].find('|') {
+                        let width = format[token_ix+1..=token_ix+ix].parse::<usize>().unwrap();
                         style.width = CellWidth::Minimum(width);
                         token_ix += ix + 1;
                 }

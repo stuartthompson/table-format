@@ -53,12 +53,14 @@ impl Default for Row {
 }
 
 impl Row {
+    #[must_use]
     pub fn new() -> Row {
         Row {
             cells: Vec::new()
         }
     }
 
+    #[must_use]
     pub fn from(
         cells: Vec<Cell>
     ) -> Row {
@@ -69,6 +71,7 @@ impl Row {
         self.cells.push(cell);
     }
 
+    #[must_use]
     pub fn iter(
         self: &Row,
     ) -> CellIterator {
@@ -78,10 +81,12 @@ impl Row {
         }
     }
 
+    #[must_use]
     pub fn len(self: &Row) -> usize {
         self.cells.len()
     }
 
+    #[must_use]
     pub fn is_empty(self: &Row) -> bool {
         self.len() == 0
     }
@@ -93,6 +98,8 @@ impl Row {
     /// * `self` - The table row to format.
     /// * `border` - The table border.
     /// * `column_breaks` - The breakpoints at which to wrap or truncate.
+    #[must_use]
+    #[allow(clippy::option_if_let_else)]
     pub fn format(
         self: &Row,
         border: &Border,
@@ -104,8 +111,7 @@ impl Row {
 
         // Get content iterators for each cell
         let mut content_iterators = Vec::new();
-        for cell_ix in 0..self.cells.len() {
-            let cell = &self.cells[cell_ix];
+        for (cell_ix, cell) in self.cells.iter().enumerate() {
             let column_break = &column_breaks[cell_ix];
             content_iterators.push(cell.get_iterator(&column_break));
         }
@@ -125,15 +131,14 @@ impl Row {
                         &content_break
                     };
                 result.push_str(
-                    &match content_iterators[cell_ix].next() {
-                        Some(content) => content.to_string(),
-                        None => {
-                            // No more lines so fill height with empty space
-                            let cell_width = cell.measure_width(column_break);
-                            (0..cell_width)
-                                .map(|_| " ")
-                                .collect::<String>()
-                        }
+                    &if let Some(content) = content_iterators[cell_ix].next() {
+                        content.to_string()
+                    } else {
+                        // No more lines so fill height with empty space
+                        let cell_width = cell.measure_width(column_break);
+                        (0..cell_width)
+                            .map(|_| " ")
+                            .collect::<String>()
                     }
                 );
                 // Vertical split (except for final column)
@@ -155,6 +160,7 @@ impl Row {
     ///
     /// * `self` - The table row being measured.
     /// * `columns` - The columns used to format the cells for this row.
+    #[must_use]
     pub fn measure_height(
         self: &Row,
         column_breaks: &[CellWidth],

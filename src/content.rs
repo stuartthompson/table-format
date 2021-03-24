@@ -45,7 +45,7 @@ impl Content {
     /// * `width` - The width at which to wrap or truncate.
     pub fn get_iterator(
         self: &Content,
-        base_style: ContentStyle,
+        base_style: &ContentStyle,
         width: usize
     ) -> ContentIterator {
         let content_len = self.content.len();

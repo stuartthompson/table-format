@@ -30,9 +30,9 @@ macro_rules! table {
             // Header specification
             crate::row!($($style => $header), *),
             // Base cell styles
-            vec!($(crate::content_style!($cell_style)),*),
+            &[$(crate::content_style!($cell_style)),*],
             // Data
-            vec!($($data),*)
+            &[$($data),*]
         )
     }
 }
@@ -47,7 +47,8 @@ pub struct Table {
 }
 
 impl Table {
-    // Returns an empty table
+    /// Returns an empty `Table`
+    #[must_use]
     pub fn empty() -> Table {
         Table {
             border: Border::default(),
@@ -59,14 +60,15 @@ impl Table {
     }
 
     /// Returns a table from the supplied parameters.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `border` - Describes the table border.
     /// * `column_breaks` - Column breaks describe header row widths.
     /// * `column_headers` - The content for the column headers.
     /// * `row_headers` - The content for the row headers.
     /// * `data_rows` - The rows in the table body.
+    #[must_use]
     pub fn new(
         border: Border,
         column_breaks: Vec<CellWidth>,
@@ -84,16 +86,17 @@ impl Table {
     }
 
     /// Returns a table built from a string vector data source.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `column_headers` - The header row describes how to split the data.
     /// * `cell_styles` - The base styles to apply to each cell.
     /// * `data` - A vector containing the data for the table body.
+    #[must_use]
     pub fn from_vec(
         column_headers: Row,
-        cell_styles: Vec<ContentStyle>,
-        data: Vec<&str>
+        cell_styles: &[ContentStyle],
+        data: &[&str]
     ) -> Table {
         // Build data items from string vector source
         let d: Vec<DataItem> = 
@@ -102,23 +105,23 @@ impl Table {
 
         Table::from_data_source(
             column_headers,
-            cell_styles,
+            &cell_styles,
             Vec::new(),
             d.iter()
         )
     }
 
     /// Returns a table built from a data source.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `column_headers` - The header row describes how to split the data.
     /// * `cell_styles` - The base styles to apply to each cell.
     /// * `row_headers` - The row headers to put before each row.
     /// * `data_source` - An iterable source providing the table body data.
     pub fn from_data_source<'a, I>(
         column_headers: Row,
-        cell_styles: Vec<ContentStyle>,
+        cell_styles: &[ContentStyle],
         row_headers: Vec<Cell>,
         data_source: I,
     ) -> Table 
@@ -174,6 +177,7 @@ impl Table {
     /// # Arguments
     ///
     /// * `self` - The table to format.
+    #[must_use]
     pub fn format(self: &Table) -> String {
         let mut result: String = String::from("");
 
@@ -274,9 +278,8 @@ impl Table {
         let mut header_width = 0;
 
         // Iterate through the header row
-        let mut column_break_ix = 0;
         let content_break = CellWidth::Content;
-        for cell in self.column_headers.iter() {
+        for (column_break_ix, cell) in self.column_headers.iter().enumerate() {
             // Get the next column break (if one is available)
             let column_break: &CellWidth = 
                 if column_break_ix < self.column_breaks.len() {
@@ -287,8 +290,6 @@ impl Table {
                 };
             // Calculate the width of this header cell
             header_width += cell.measure_width(column_break);
-            // Increment column index
-            column_break_ix += 1;
         }
 
         // Add space for the outer borders

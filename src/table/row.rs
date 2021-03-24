@@ -1,18 +1,18 @@
 use super::border::Border;
-use super::table_cell::TableCell;
+use super::cell::Cell;
 use crate::content::{CellWidth};
 
 pub struct CellIterator<'a> {
-    cells: &'a Vec<TableCell>,
+    cells: &'a Vec<Cell>,
     current_cell_ix: usize
 }
 
 impl<'a> Iterator for CellIterator<'a> {
-    type Item = &'a TableCell;
+    type Item = &'a Cell;
 
-    fn next(&mut self) -> Option<&'a TableCell> {
+    fn next(&mut self) -> Option<&'a Cell> {
         if self.current_cell_ix < self.cells.len() {
-            let cell: &TableCell = &self.cells[self.current_cell_ix];
+            let cell: &Cell = &self.cells[self.current_cell_ix];
             self.current_cell_ix += 1;
             Some(cell)
         } else {
@@ -26,51 +26,51 @@ impl<'a> Iterator for CellIterator<'a> {
 macro_rules! row {
     ( $($style:expr => $content:expr),* ) => {
         {
-            let mut tr: TableRow = TableRow::new();
-            $( tr.add_cell(crate::cell!($style, $content)); )*
-            tr
+            let mut r: Row = Row::new();
+            $( r.add_cell(crate::cell!($style, $content)); )*
+            r
         }
     };
     ( $style:expr, $($content:expr),* ) => {
         {
-            let mut tr: TableRow = TableRow::new();
-            $( tr.add_cell(crate::cell!($style, $content)); )*
-            tr
+            let mut r: Row = Row::new();
+            $( r.add_cell(crate::cell!($style, $content)); )*
+            r
         }
     };
 }
 
 /// Table rows represent horizontal breakpoints.
 #[derive(Debug)]
-pub struct TableRow {
-    cells: Vec<TableCell>
+pub struct Row {
+    cells: Vec<Cell>
 }
 
-impl Default for TableRow {
+impl Default for Row {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl TableRow {
-    pub fn new() -> TableRow {
-        TableRow {
+impl Row {
+    pub fn new() -> Row {
+        Row {
             cells: Vec::new()
         }
     }
 
     pub fn from(
-        cells: Vec<TableCell>
-    ) -> TableRow {
-        TableRow { cells }
+        cells: Vec<Cell>
+    ) -> Row {
+        Row { cells }
     }
 
-    pub fn add_cell(&mut self, cell: TableCell) {
+    pub fn add_cell(&mut self, cell: Cell) {
         self.cells.push(cell);
     }
 
     pub fn iter(
-        self: &TableRow,
+        self: &Row,
     ) -> CellIterator {
         CellIterator {
             cells: &self.cells,
@@ -78,11 +78,11 @@ impl TableRow {
         }
     }
 
-    pub fn len(self: &TableRow) -> usize {
+    pub fn len(self: &Row) -> usize {
         self.cells.len()
     }
 
-    pub fn is_empty(self: &TableRow) -> bool {
+    pub fn is_empty(self: &Row) -> bool {
         self.len() == 0
     }
 
@@ -94,7 +94,7 @@ impl TableRow {
     /// * `border` - The table border.
     /// * `column_breaks` - The breakpoints at which to wrap or truncate.
     pub fn format(
-        self: &TableRow,
+        self: &Row,
         border: &Border,
         column_breaks: &[CellWidth]
     ) -> String {
@@ -156,7 +156,7 @@ impl TableRow {
     /// * `self` - The table row being measured.
     /// * `columns` - The columns used to format the cells for this row.
     pub fn measure_height(
-        self: &TableRow,
+        self: &Row,
         column_breaks: &[CellWidth],
     ) -> usize {
         let mut tallest_height = 0;
@@ -192,7 +192,7 @@ mod tests {
     fn test_row_macro_style_per_cell() {
         assert_eq!(
             format!("{:?}", row!("{c^}" => "Head 1", "{G-r>}" => "Head 2")),
-            format!("{:?}", TableRow::from(
+            format!("{:?}", Row::from(
                 vec!(
                     crate::cell!("{c^}", "Head 1"),
                     crate::cell!("{G-r>}", "Head 2")
@@ -205,7 +205,7 @@ mod tests {
     fn test_row_macro_common_style() {
         assert_eq!(
             format!("{:?}", row!("{c^}", "Text 1", "Text 2", "Text 3")),
-            format!("{:?}", TableRow::from(
+            format!("{:?}", Row::from(
                 vec!(
                     crate::cell!("{c^}", "Text 1"),
                     crate::cell!("{c^}", "Text 2"),

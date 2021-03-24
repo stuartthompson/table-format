@@ -1,12 +1,12 @@
 mod border;
-pub mod table_row;
-pub mod table_cell;
+pub mod row;
+pub mod cell;
 
 use std::str::FromStr;
 use border::Border;
 use super::data_item::DataItem;
-use table_cell::TableCell;
-use table_row::TableRow;
+use cell::Cell;
+use row::Row;
 use crate::content::{ContentStyle, CellWidth};
 
 #[allow(unused_macros)]
@@ -41,9 +41,9 @@ macro_rules! table {
 pub struct Table {
     border: Border,
     column_breaks: Vec<CellWidth>,
-    column_headers: TableRow,
-    row_headers: Vec<TableCell>,
-    data_rows: Vec<TableRow>
+    column_headers: Row,
+    row_headers: Vec<Cell>,
+    data_rows: Vec<Row>
 }
 
 impl Table {
@@ -52,7 +52,7 @@ impl Table {
         Table {
             border: Border::default(),
             column_breaks: Vec::new(),
-            column_headers: TableRow::new(),
+            column_headers: Row::new(),
             row_headers: Vec::new(),
             data_rows: Vec::new(),
         }
@@ -70,9 +70,9 @@ impl Table {
     pub fn new(
         border: Border,
         column_breaks: Vec<CellWidth>,
-        column_headers: TableRow,
-        row_headers: Vec<TableCell>,
-        data_rows: Vec<TableRow>,
+        column_headers: Row,
+        row_headers: Vec<Cell>,
+        data_rows: Vec<Row>,
     ) -> Table {
         Table {
             border,
@@ -91,7 +91,7 @@ impl Table {
     /// * `cell_styles` - The base styles to apply to each cell.
     /// * `data` - A vector containing the data for the table body.
     pub fn from_vec(
-        column_headers: TableRow,
+        column_headers: Row,
         cell_styles: Vec<ContentStyle>,
         data: Vec<&str>
     ) -> Table {
@@ -117,9 +117,9 @@ impl Table {
     /// * `row_headers` - The row headers to put before each row.
     /// * `data_source` - An iterable source providing the table body data.
     pub fn from_data_source<'a, I>(
-        column_headers: TableRow,
+        column_headers: Row,
         cell_styles: Vec<ContentStyle>,
-        row_headers: Vec<TableCell>,
+        row_headers: Vec<Cell>,
         data_source: I,
     ) -> Table 
         where 
@@ -135,7 +135,7 @@ impl Table {
 
         // Create a new row
         let mut row_ix = 0;
-        data_rows.push(TableRow::new());
+        data_rows.push(Row::new());
 
         let mut break_ix = 0;
 
@@ -143,7 +143,7 @@ impl Table {
             // Add a new row if needed
             if break_ix == column_breaks.len() {
                 break_ix = 0;
-                data_rows.push(TableRow::new());
+                data_rows.push(Row::new());
                 row_ix += 1;
             }
 
@@ -154,7 +154,7 @@ impl Table {
             }
 
             data_rows[row_ix].add_cell(
-                TableCell::from_data_item(item, cell_style.clone())
+                Cell::from_data_item(item, cell_style.clone())
             );
 
             break_ix += 1;
@@ -205,7 +205,7 @@ impl Table {
         // Render column header row
         result.push_str(
             &self.column_headers.format(
-                &self.border, 
+                &self.border,
                 &self.column_breaks
             )
         );
@@ -240,7 +240,7 @@ impl Table {
             let row = &self.data_rows[row_ix];
             result.push_str(
                 &row.format(
-                    &self.border, 
+                    &self.border,
                     &self.column_breaks
                 )
             );
@@ -261,7 +261,7 @@ impl Table {
     }
 
     /// Measures the width of a table.
-    /// 
+    ///
     /// Column breaks are used to constrain the render width of columns and 
     ///  are considered along with the content of the header cells.
     ///
@@ -307,10 +307,10 @@ mod tests {
     use std::env;
 
     /// Tests the simple format table! macro.
-    /// 
+    ///
     /// This macro takes column breaks and header content in the first row, 
     /// terminated by a semicolon.
-    /// 
+    ///
     /// The second row is a vector of strings that are used for the table body.
     #[test]
     fn table_macro_simple_unstyled_body() {

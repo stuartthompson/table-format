@@ -12,8 +12,8 @@ mod tests {
     use super::*;
     use std::env;
     use table::Table;
-    use table::table_row::TableRow;
-    use table::table_cell::TableCell;
+    use table::row::Row;
+    use table::cell::Cell;
 
     #[test]
     fn test_simple_vector_table() {

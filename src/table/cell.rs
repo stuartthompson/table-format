@@ -77,7 +77,7 @@ macro_rules! cell_content {
 #[macro_export]
 macro_rules! cell {
     ($style:expr, $($content:tt)*) => {
-        TableCell::from_styled_content(
+        Cell::from_styled_content(
             $style, 
             crate::cell_content!($($content)*)
         );
@@ -88,14 +88,14 @@ macro_rules! cell {
 /// 
 /// Cells belong to a row.
 #[derive(Debug)]
-pub struct TableCell {
+pub struct Cell {
     contents: Vec<Content>,
     base_style: ContentStyle,
 }
 
-impl TableCell {
-    pub fn empty() -> TableCell {
-        TableCell {
+impl Cell {
+    pub fn empty() -> Cell {
+        Cell {
             contents: Vec::new(),
             base_style: ContentStyle::default(),
         }
@@ -104,8 +104,8 @@ impl TableCell {
     pub fn new(
         contents: Vec<Content>,
         base_style: ContentStyle,
-    ) -> TableCell {
-        TableCell {
+    ) -> Cell {
+        Cell {
             contents,
             base_style
         }
@@ -114,10 +114,10 @@ impl TableCell {
     pub fn from_styled_content(
         format: &str,
         contents: Vec<&str>,
-    ) -> TableCell {
+    ) -> Cell {
         // Split the format string into style tokens
         let styles: Vec<&str> = format.split(' ').collect();
-        let mut table_cell = TableCell::empty();
+        let mut table_cell = Cell::empty();
 
         // Iterate the contents
         for (style_ix, content) in contents.into_iter().enumerate() {
@@ -143,8 +143,8 @@ impl TableCell {
     pub fn from_data_item(
         data_item: &DataItem,
         base_style: ContentStyle,
-    ) -> TableCell {
-        TableCell::new(
+    ) -> Cell {
+        Cell::new(
             data_item.lines.to_vec(),
             base_style,
         )
@@ -156,7 +156,7 @@ impl TableCell {
     /// This is used to determine the column break for cells used in the table 
     /// header row.
     pub fn get_cell_width(
-        self: &TableCell
+        self: &Cell
     ) -> CellWidth {
         if self.contents.is_empty() {
             CellWidth::default() }
@@ -173,7 +173,7 @@ impl TableCell {
     /// # Arguments
     /// * `self` - The table cell containing the line.  * `width` - The format width.
     pub fn get_iterator(
-        self: &TableCell,
+        self: &Cell,
         column_break: &CellWidth
     ) -> TableCellContentIterator {
         // Determine the render width of this cell
@@ -199,7 +199,7 @@ impl TableCell {
     /// * `self` - The table cell being measured.
     /// * `column_width` - The column width to measure against.
     pub fn measure_height(
-        self: &TableCell,
+        self: &Cell,
         column_break: &CellWidth,
     ) -> usize {
         let mut height = 0;
@@ -228,7 +228,7 @@ impl TableCell {
     /// * `self` - The table cell being measured.
     /// * `column_break` - The column break for this cell.
     pub fn measure_width(
-        self: &TableCell,
+        self: &Cell,
         column_break: &CellWidth,
     ) -> usize {
         match column_break {
@@ -252,17 +252,17 @@ impl TableCell {
     /// This measure ignores wrapping or truncation and returns the raw width 
     ///  of the longest content item.
     fn measure_content_width(
-        self: &TableCell
+        self: &Cell
     ) -> usize {
         let mut largest = 0;
         for content in &self.contents {
             let content_width = content.measure_width();
             if content_width > largest {
                 largest = content_width;
-            } 
+            }
         }
 
-        largest  
+        largest
     }
 }
 
@@ -271,7 +271,7 @@ mod tests {
     use super::*;
     use colored::Color;
     use crate::content::{Alignment, Wrap};
-    
+
     #[test]
     fn test_table_cell_macro() {
         let tc = cell!("{r<;} {G-b^}", "testing", "this");
@@ -279,8 +279,8 @@ mod tests {
         assert_eq!(tc.contents.len(), 2);
 
         assert_eq!(
-            format!("{:?}", tc.contents[0]), 
-            format!("{:?}", Content::new( 
+            format!("{:?}", tc.contents[0]),
+            format!("{:?}", Content::new(
                 "testing".to_string(),
                 Some(ContentStyle::new(
                     Some(Color::Red),
@@ -292,5 +292,4 @@ mod tests {
             ))
         );
     }
-
 }

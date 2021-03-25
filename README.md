@@ -5,47 +5,94 @@
 [<img alt="last commit" src="https://img.shields.io/github/last-commit/stuartthompson/table-format?logo=GitHub&style=for-the-badge" height="20">](https://github.com/stuartthompson/table-format/commits/master)
 [<img alt="ci status" src="https://img.shields.io/github/workflow/status/stuartthompson/table-format/CI?label=Build&logo=GitHub%20Actions&logoColor=%23ffffff&style=for-the-badge" height="20">](https://github.com/stuartthompson/table-format/actions/workflows/ci.yml)
 
-This crate formats data as a text table, suitable for printing to the terminal 
-or for inclusion in logs.
+Formats tables for printing to the terminal or inclusion in logs. Offers
+concise syntax for simple use cases and advanced options to address more
+complex needs.
 
-## Changelog
+## Documentation
 
-* v0.0.1 - Initial files. Tests are passing. Table header formats.
-* v0.0.2 - Table macros. Base cell styles. Color codes for initial elements.
-* v0.0.3 - ColumnBreak->CellWidth. Now a part of content style.
-* v0.0.4 - Linting, bug fixes, test cleanup. More test coverage.
+See the complete documentation here:
+[Table-Format Documentation]()
 
-## Roadmap
-* v0.0.5 - Examples and README improvement.
-* v0.1.0 - Documentation cleanup pass. Get what is there clean and tidy.
 
-## Examples
+#### What does it do?
 
-The following code prints a two-column table from a vector of strings:
+Table-format is a library written in the Rust programming language that helps
+with formatting data into text tables. It offers control over the styling of
+header and body elements independently and includes some more advanced use
+cases including row headers (horizontally-placed headers), partial row support
+(where the data source does not contain enough values for a complete final
+row), and per-cell styling options, including multi-line, per-line formatting
+for more complex visualization use cases.
+
+#### Why this library vs. others?
+
+I built this library to solve a specific formatting problem that occurred
+regularly enough in my programming journey to warrant a specific solution; a
+way to print and visualize data structures at the terminal. There are many
+other really good table formatters out there. None of them met my specific
+needs and so I built my own. I hope that it may be useful to others.
+
+## Simple Tables
+
+Create a simple table using the table! macro, describing the header columns,
+and providing an array of data or a vector for the body.
 
 ```
-let table = 
+println!("{}",
     table!(
-        "{B^:12:}" => "Food", "{G^:7:}" => "Count";
-        "Fish", "15", "Pizza", "10", "Tomato", "24"
-    );
-
-let output = table.format();
+        "{^:10:}" => "Food", "{^:10:}" => "Count";
+        "Fish", "15", "Pizza", "10", "Steak", "6"
+    ).format()
+);
 ```
 
-Output:
-*(color codes not shown)*
 ```
-+--------------------+
-|    Food    | Count |
-+--------------------+
-|Fish        |15     |
-+--------------------+
-|Pizza       |10     |
-+--------------------+
-|Tomato      |24     |
-+--------------------+
++---------------------+
+|   Food   |  Count   |
++---------------------+
+|Fish      |15        |
++---------------------+
+|Pizza     |10        |
++---------------------+
+|Steak     |6         |
++---------------------+
 ```
+
+## More Advanced Use Cases
+
+#### Colors
+
+[include images with color]
+
+#### Alignment
+
+[table showing multiple different alignments]
+
+#### Wrapping
+
+[wrapped text vs. truncated text]
+
+#### Multi-Line Cells
+
+[table with multi-line text cells]
+
+#### Per-Line Formatting
+
+[multi-line formatting example]
+
+#### Iterator Data Sources
+
+[code showing use of an iterator data source]
+
+Create highly customized table output using the advanced formatting options.
+
+## Changelog & Roadmap
+
+See the
+[CHANGELOG](https://github.com/stuartthompson/table-format/CHANGELOG.md) and
+[ROADMAP](https://github.com/stuartthompson/table-format/ROADMAP.md) for
+details.
 
 ## Content Style
 
@@ -60,19 +107,21 @@ elements:
 
 ### Style Directives
 
-A short-hand for specifying content styles is to use a style directive. These 
-strings are formatted as follows:
+A short-hand for specifying content styles is to use a style directive. These
+format strings are specified as follows:
 
 ```
-{alignment[color]|width|wrap}
+{alignment|color|width|wrap}
 ```
 
 #### Alignment
 
 Alignment is specified using one of: < ^ >
-* <  *(default)* left aligned
-* ^  center aligned
-* >  right aligned
+```
+* <   - *(default)* left aligned
+* ^   - center aligned
+* \>  - right aligned
+```
 
 #### Color
 
@@ -87,10 +136,10 @@ indicate bright colors.
 
 Example color codes:
 ```
-[c]   - Cyan on black  (foreground color specified only)
-[rG]  - Dark red on bright breen
-[Wb]  - Bright white on dark blue
-[-g]  - White on dark green  (background color specified only)
+c   - Cyan on black  (foreground color specified only)
+rG  - Dark red on bright breen
+Wb  - Bright white on dark blue
+-g  - White on dark green  (background color specified only)
 ```
 
 #### Width
@@ -111,9 +160,9 @@ There are three width rules that can be specified:
 Example width specifiers:
 
 ```
-|f15|  - Fixed width of 15 chars
-|m10|  - Minimum width of 10 chars
-|c|    - (default) Sized according to content
+:15:  - Fixed width of 15 chars
+|10|  - Minimum width of 10 chars
+@     - (default) Sized according to content
 ```
 
 #### Wrap
@@ -140,21 +189,21 @@ truncate". It is not necessary to include an empty style directive.
 Examples of partial directives:
 ```
 {>;}    - Right-aligned, white on black, content width, wrapped
-{[-g]}  - Left-aligned, white on dark green, content width, truncated
+{-g}  - Left-aligned, white on dark green, content width, truncated
 {;}     - Left-aligned, white on black, content width, wrapped
-{|f15|} - Left-aligned, white on black, fixed 15 char width, truncated
+{:15:}  - Left-aligned, white on black, fixed 15 char width, truncated
 ```
 
 ### Examples
 
 Example 1: Left-aligned, cyan on black, fixed 15-char width, truncate:
 ```
-{<[c]|f15|}
+{<[c]:15:}
 ```
 
 Example 2: Center-aligned, bright yellow on dark green background, content 
 width, wrap content:
 ```
-{^[Yg]|c|;}
+{^[Yg]@;}
 ```
-*Note: The |c| above is optional and can be omitted.*
+*Note: The @ above is optional and can be omitted.*

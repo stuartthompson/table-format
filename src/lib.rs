@@ -16,6 +16,16 @@ mod tests {
     use table::cell::Cell;
 
     #[test]
+    fn test_simple_table() {
+        println!("{}",
+            table!(
+                "{^:10:}" => "Food", "{^:10:}" => "Count";
+                "Fish", "15", "Pizza", "10", "Steak", "6"
+            ).format()
+        );
+    }
+
+    #[test]
     fn test_simple_vector_table() {
         let table = table!(
             "{c^:15:}" => "Food", "{c^:10:}" => "Count";

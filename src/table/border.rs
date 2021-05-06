@@ -26,6 +26,7 @@ pub struct Border {
 }
 
 impl Border {
+    #[must_use]
     pub fn default() -> Border {
         Border {
             top_left: '+',
@@ -53,9 +54,10 @@ impl Border {
     }
 
     /// Formats the top border
+    #[must_use]
     pub fn format_top(
         self: &Border,
-        widths: &Vec<usize>
+        widths: &[usize]
     ) -> String {
         let mut result: String = String::from(self.top_left);
         for ix in 0..widths.len() {
@@ -73,9 +75,10 @@ impl Border {
     }
 
     /// Formats the bottom border
+    #[must_use]
     pub fn format_bottom(
         self: &Border,
-        widths: &Vec<usize>
+        widths: &[usize]
     ) -> String {
         let mut result: String = String::from(self.bottom_left);
         for ix in 0..widths.len() {
@@ -92,12 +95,16 @@ impl Border {
         result
     }
 
+    /// Formats the left border.
+    #[must_use]
     pub fn format_left(
         self: &Border
     ) -> String {
         format!("{}", self.left)
     }
 
+    /// Formats the right border.
+    #[must_use]
     pub fn format_right(
         self: &Border
     ) -> String {
@@ -105,9 +112,10 @@ impl Border {
     }
 
     /// Formats a horizontal split
+    #[must_use]
     pub fn format_horizontal_split(
         self: &Border,
-        widths: &Vec<usize>
+        widths: &[usize]
     ) -> String {
         let mut result: String = String::from(self.left_split);
         for ix in 0..widths.len() {

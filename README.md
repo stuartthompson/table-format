@@ -59,7 +59,19 @@ println!("{}",
 +---------------------+
 ```
 
-## More Advanced Use Cases
+### Custom Borders
+
+Custom borders:
+
+```
+┌──────────┬────────────────────┐
+│  Custom  │      Borders       │
+├──────────┼────────────────────┤
+│are       │super fun           │
+├──────────┼────────────────────┤
+│and       │super awesome       │
+└──────────┴────────────────────┘
+```
 
 #### Colors
 

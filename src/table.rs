@@ -204,7 +204,7 @@ impl Table {
     /// * `self` - The table containing the column headers to format.
     fn format_header(
         self: &Table,
-        widths: &Vec<usize>
+        widths: &[usize]
     ) -> String {
         let mut result: String = String::from("");
 
@@ -240,7 +240,7 @@ impl Table {
     /// * `maximum_width` - The maximum render width, in chars.
     fn format_body(
         self: &Table,
-        widths: &Vec<usize>
+        widths: &[usize]
     ) -> String {
         let mut result: String = String::from("");
 

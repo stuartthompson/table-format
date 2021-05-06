@@ -111,7 +111,7 @@ impl Border {
         format!("{}", self.right)
     }
 
-    /// Formats a horizontal split
+    /// Formats a horizontal split.
     #[must_use]
     pub fn format_horizontal_split(
         self: &Border,
@@ -134,6 +134,8 @@ impl Border {
         result
     }
 
+    /// Formats a vertical split.
+    #[must_use]
     pub fn format_vertical_split(
         self: &Border
     ) -> String {

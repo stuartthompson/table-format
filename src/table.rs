@@ -3,7 +3,7 @@ pub mod row;
 pub mod cell;
 
 use std::str::FromStr;
-use border::Border;
+pub use border::Border;
 use super::data_item::DataItem;
 use cell::Cell;
 use row::Row;
@@ -23,8 +23,8 @@ macro_rules! table {
 
     // Base cell style format
     ( $($style:literal=>$header:literal),*;
-      $($cell_style:literal),*; 
-      $($data:literal),* ) => 
+      $($cell_style:literal),*;
+      $($data:literal),* ) =>
     {
         Table::from_vec(
             // Header specification
@@ -39,7 +39,7 @@ macro_rules! table {
 
 #[derive(Debug)]
 pub struct Table {
-    border: Border,
+    pub border: Border,
     column_breaks: Vec<CellWidth>,
     column_headers: Row,
     row_headers: Vec<Cell>,
@@ -185,11 +185,14 @@ impl Table {
     pub fn format(self: &Table) -> String {
         let mut result: String = String::from("");
 
+        // Measure column widths
+        let widths = self.measure_column_widths();
+
         // Format header row
-        result.push_str(&self.format_header());
+        result.push_str(&self.format_header(&widths));
 
         // Format table body
-        result.push_str(&self.format_body());
+        result.push_str(&self.format_body(&widths));
 
         result
     }
@@ -200,14 +203,13 @@ impl Table {
     ///
     /// * `self` - The table containing the column headers to format.
     fn format_header(
-        self: &Table
+        self: &Table,
+        widths: &Vec<usize>
     ) -> String {
         let mut result: String = String::from("");
 
-        let header_width = self.measure_width();
-
         // Print top border
-        result.push_str(&self.border.format_top(header_width));
+        result.push_str(&self.border.format_top(&widths));
         result.push('\n');
 
         // Render column header row
@@ -219,7 +221,7 @@ impl Table {
         );
 
         // Print horizontal split beneath headers
-        result.push_str(&self.border.format_horizontal_split(header_width));
+        result.push_str(&self.border.format_horizontal_split(&widths));
         result.push('\n');
 
         result
@@ -237,10 +239,9 @@ impl Table {
     /// * `self` - The table being formatted.
     /// * `maximum_width` - The maximum render width, in chars.
     fn format_body(
-        self: &Table
+        self: &Table,
+        widths: &Vec<usize>
     ) -> String {
-        let render_width = self.measure_width();
-
         let mut result: String = String::from("");
 
         // Iterate rows
@@ -256,36 +257,36 @@ impl Table {
             // Print horizontal split beneath all but last row
             if row_ix < self.data_rows.len() - 1 {
                 result.push_str(
-                    &self.border.format_horizontal_split(render_width));
+                    &self.border.format_horizontal_split(&widths));
                 result.push('\n');
             }
         }
 
         // Print bottom border at end of table
-        result.push_str(&self.border.format_bottom(render_width));
+        result.push_str(&self.border.format_bottom(&widths));
         result.push('\n');
 
         result
     }
 
-    /// Measures the width of a table.
+    /// Measures the widths of the columns of a table.
     ///
-    /// Column breaks are used to constrain the render width of columns and 
+    /// Column breaks are used to constrain the render width of columns and
     ///  are considered along with the content of the header cells.
     ///
     /// # Arguments
     ///
     /// * `self` - The table being measured.
-    fn measure_width(
+    fn measure_column_widths(
         self: &Table
-    ) -> usize {
-        let mut header_width = 0;
+    ) -> Vec<usize> {
+        let mut widths = Vec::new();
 
         // Iterate through the header row
         let content_break = CellWidth::Content;
         for (column_break_ix, cell) in self.column_headers.iter().enumerate() {
             // Get the next column break (if one is available)
-            let column_break: &CellWidth = 
+            let column_break: &CellWidth =
                 if column_break_ix < self.column_breaks.len() {
                     &self.column_breaks[column_break_ix]
                 } else {
@@ -293,16 +294,10 @@ impl Table {
                     &content_break
                 };
             // Calculate the width of this header cell
-            header_width += cell.measure_width(column_break);
+            widths.push(cell.measure_width(column_break));
         }
 
-        // Add space for the outer borders
-        header_width += 2;
-
-        // Add space for vertical splits separators between columns
-        header_width += self.column_headers.len() - 1;
-
-        header_width
+        widths
     }
 }
 
@@ -324,10 +319,10 @@ mod tests {
             "Fish", "15", "Pizza", "10", "Tomato", "24"
         );
 
-        let expected = 
+        let expected =
             match env::var("NO_COLOR") {
-                Ok(_) => "+--------------------+\n|    Food    | Count |\n+--------------------+\n|Fish        |15     |\n+--------------------+\n|Pizza       |10     |\n+--------------------+\n|Tomato      |24     |\n+--------------------+\n",
-                Err(_) => "+--------------------+\n|\u{1b}[94m    Food    \u{1b}[0m|\u{1b}[92m Count \u{1b}[0m|\n+--------------------+\n|Fish        |15     |\n+--------------------+\n|Pizza       |10     |\n+--------------------+\n|Tomato      |24     |\n+--------------------+\n",
+                Ok(_) => "+------------+-------+\n|    Food    | Count |\n+------------+-------+\n|Fish        |15     |\n+------------+-------+\n|Pizza       |10     |\n+------------+-------+\n|Tomato      |24     |\n+------------+-------+\n",
+                Err(_) => "+------------+-------+\n|\u{1b}[94m    Food    \u{1b}[0m|\u{1b}[92m Count \u{1b}[0m|\n+------------+-------+\n|Fish        |15     |\n+------------+-------+\n|Pizza       |10     |\n+------------+-------+\n|Tomato      |24     |\n+------------+-------+\n",
             };
 
         assert_eq!(
@@ -344,10 +339,10 @@ mod tests {
             "Basic", "$5,000", "Super", "$12,000", "Ultimate", "$35,000"
         );
 
-        let expected = 
+        let expected =
             match env::var("NO_COLOR") {
-                Ok(_) => "+---------------------+\n|      Item|     Price|\n+---------------------+\n|  Basic   |$5,000    |\n+---------------------+\n|  Super   |$12,000   |\n+---------------------+\n| Ultimate |$35,000   |\n+---------------------+\n",
-                Err(_) => "+---------------------+\n|\u{1b}[35m      Item\u{1b}[0m|\u{1b}[35m     Price\u{1b}[0m|\n+---------------------+\n|\u{1b}[36m  Basic   \u{1b}[0m|\u{1b}[32m$5,000    \u{1b}[0m|\n+---------------------+\n|\u{1b}[36m  Super   \u{1b}[0m|\u{1b}[32m$12,000   \u{1b}[0m|\n+---------------------+\n|\u{1b}[36m Ultimate \u{1b}[0m|\u{1b}[32m$35,000   \u{1b}[0m|\n+---------------------+\n"
+                Ok(_) => "+----------+----------+\n|      Item|     Price|\n+----------+----------+\n|  Basic   |$5,000    |\n+----------+----------+\n|  Super   |$12,000   |\n+----------+----------+\n| Ultimate |$35,000   |\n+----------+----------+\n",
+                Err(_) => "+----------+----------+\n|\u{1b}[35m      Item\u{1b}[0m|\u{1b}[35m     Price\u{1b}[0m|\n+----------+----------+\n|\u{1b}[36m  Basic   \u{1b}[0m|\u{1b}[32m$5,000    \u{1b}[0m|\n+----------+----------+\n|\u{1b}[36m  Super   \u{1b}[0m|\u{1b}[32m$12,000   \u{1b}[0m|\n+----------+----------+\n|\u{1b}[36m Ultimate \u{1b}[0m|\u{1b}[32m$35,000   \u{1b}[0m|\n+----------+----------+\n"
             };
 
         assert_eq!(

@@ -2,27 +2,27 @@ use colored::Color;
 
 #[derive(Debug)]
 pub struct Border {
-    top_left: char,
-    top: char,
-    top_right: char,
-    top_split: char,
-    bottom_left: char,
-    bottom: char,
-    bottom_right: char,
-    bottom_split: char,
-    left: char,
-    left_split: char,
-    right: char,
-    right_split: char,
-    vertical_split: char,
-    vertical_split_intersect_left: char,
-    vertical_split_intersect_right: char,
-    vertical_split_intersect_both: char,
-    horizontal_split: char,
-    horizontal_split_intersect_left: char,
-    horizontal_split_intersect_right: char,
-    horizontal_split_intersect_both: char,
-    color: Color
+    pub top_left: char,
+    pub top: char,
+    pub top_right: char,
+    pub top_split: char,
+    pub bottom_left: char,
+    pub bottom: char,
+    pub bottom_right: char,
+    pub bottom_split: char,
+    pub left: char,
+    pub left_split: char,
+    pub right: char,
+    pub right_split: char,
+    pub vertical_split: char,
+    pub vertical_split_intersect_left: char,
+    pub vertical_split_intersect_right: char,
+    pub vertical_split_intersect_both: char,
+    pub horizontal_split: char,
+    pub horizontal_split_intersect_top: char,
+    pub horizontal_split_intersect_bottom: char,
+    pub horizontal_split_intersect_both: char,
+    pub color: Color
 }
 
 impl Border {
@@ -45,8 +45,8 @@ impl Border {
             vertical_split_intersect_right: '+',
             vertical_split_intersect_both: '+',
             horizontal_split: '-',
-            horizontal_split_intersect_left: '+',
-            horizontal_split_intersect_right: '+',
+            horizontal_split_intersect_top: '+',
+            horizontal_split_intersect_bottom: '+',
             horizontal_split_intersect_both: '+',
             color: Color::Cyan
         }
@@ -55,27 +55,41 @@ impl Border {
     /// Formats the top border
     pub fn format_top(
         self: &Border,
-        width: usize
+        widths: &Vec<usize>
     ) -> String {
-        format!("{}{}{}", 
-            self.top_left,
-            &(0..width - 2)
-                .map(|_| self.top)
-                .collect::<String>(),
-            self.top_right)
+        let mut result: String = String::from(self.top_left);
+        for ix in 0..widths.len() {
+            result.push_str(
+              &(0..widths[ix])
+                  .map(|_| self.top)
+                  .collect::<String>()
+            );
+            if ix < widths.len() - 1 {
+               result.push_str(String::from(self.top_split).as_str());
+            }
+        }
+        result.push_str(String::from(self.top_right).as_str());
+        result
     }
 
     /// Formats the bottom border
     pub fn format_bottom(
         self: &Border,
-        width: usize
+        widths: &Vec<usize>
     ) -> String {
-        format!("{}{}{}", 
-            self.bottom_left,
-            &(0..width - 2)
-                .map(|_| self.bottom)
-                .collect::<String>(),
-            self.bottom_right)
+        let mut result: String = String::from(self.bottom_left);
+        for ix in 0..widths.len() {
+            result.push_str(
+                &(0..widths[ix])
+                    .map(|_| self.bottom)
+                    .collect::<String>()
+            );
+            if ix < widths.len() - 1 {
+                result.push_str(String::from(self.bottom_split).as_str());
+            }
+        }
+        result.push_str(String::from(self.bottom_right).as_str());
+        result
     }
 
     pub fn format_left(
@@ -93,15 +107,23 @@ impl Border {
     /// Formats a horizontal split
     pub fn format_horizontal_split(
         self: &Border,
-        width: usize
+        widths: &Vec<usize>
     ) -> String {
-        format!("{}{}{}",
-            self.left_split,
-            &(0..width - 2)
-                .map(|_| self.horizontal_split)
-                .collect::<String>(),
-            self.right_split
-        )
+        let mut result: String = String::from(self.left_split);
+        for ix in 0..widths.len() {
+            result.push_str(
+                &(0..widths[ix])
+                    .map(|_| self.horizontal_split)
+                    .collect::<String>()
+            );
+            if ix < widths.len() - 1 {
+                result.push_str(
+                    String::from(self.horizontal_split_intersect_both).as_str()
+                );
+            }
+        }
+        result.push_str(String::from(self.right_split).as_str());
+        result
     }
 
     pub fn format_vertical_split(
